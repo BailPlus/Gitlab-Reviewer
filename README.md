@@ -182,7 +182,7 @@ pip install -r requirements.txt
 
 ## 前端
 
-- 技术栈: React
+- 技术栈: React + Next.js
 
 ### 安装
 
