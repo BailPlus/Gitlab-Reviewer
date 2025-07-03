@@ -1,0 +1,10 @@
+{
+  "files.exclude": {
+    "**/__pycache__": true,
+    ".python-version": true,
+    "pyproject.toml": true,
+    "uv.lock": true,
+    ".venv": true
+  },
+  "explorer.excludeGitIgnore": false
+}
