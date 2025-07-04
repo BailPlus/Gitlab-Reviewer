@@ -251,11 +251,21 @@ uv run run.py
 
 数据库：MariaDB
 
+#### `token` 表
+
+| 列名          | 类型             | 可否为空 | 键    | 默认值              | 额外                          |
+| ------------ | ---------------- | ---- | ------- | ------------------ | ---------------------------- |
+| token        | VARCHAR(64)      | NO   | PRI     |                    |                              |
+| user\_id     | BIGINT UNSIGNED  | NO   | MUL(FK) |                    |                              |
+| exp          | INTEGER          | NO   |         |                    |                              |
+| created\_at   | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                              |
+| updated\_at   | DATETIME        | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
+
 #### `users` 表
 
 | 列名             | 类型              | 可否为空 | 键   | 默认值                | 额外                           |
 | -------------- | --------------- | ---- | --- | ------------------ | ---------------------------- |
-| id             | BIGINT UNSIGNED | NO   | PRI |                    | AUTO\_INCREMENT              |
+| id             | BIGINT UNSIGNED | NO   | PRI |                    |                              |
 | username       | VARCHAR(50)     | NO   | UNI |                    |                              |
 | password\_hash | VARCHAR(255)    | NO   |     |                    |                              |
 | email          | VARCHAR(100)    | NO   | UNI |                    |                              |

@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class CookiesSchema(BaseModel):
     """Cookie"""
-    token: str
+    token: str = Field(description="gitlab token")

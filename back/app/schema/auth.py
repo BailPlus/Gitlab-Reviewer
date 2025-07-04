@@ -1,16 +1,7 @@
-from . import BaseOutput
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
-class LoginOutput(BaseOutput):
-    """登录回调输出"""
-    data: BaseModel = type('',(BaseModel,),{})()
-
-class PartialProfileOutput(BaseModel):
+class ProfileOutput(BaseModel):
     """用户信息输出"""
-    username: str
-    email: str
-
-class ProfileOutput(BaseOutput):
-    """用户信息输出"""
-    data: PartialProfileOutput
+    username: str = Field(description="用户名")
+    email: str = Field(description="邮箱")
