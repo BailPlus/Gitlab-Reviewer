@@ -1,5 +1,4 @@
-from typing import Optional
-from sqlmodel import SQLModel, Field, ForeignKey
+from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, Integer
 from . import TimestampMixin
 
@@ -13,12 +12,3 @@ class Users(TimestampMixin, SQLModel, table=True):
     ))
     username: str
     email: str
-
-
-class Tokens(TimestampMixin, SQLModel, table=True):
-    token: str = Field(primary_key=True)
-    user_id: int = Field(sa_column=Column(
-        Integer,
-        ForeignKey("users.id", ondelete="CASCADE")
-    ))
-    exp: int

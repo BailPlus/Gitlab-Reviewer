@@ -1,15 +1,13 @@
-from typing import Optional
 from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, Integer, ForeignKey
 from . import TimestampMixin
 
 
-class Repositories(TimestampMixin, SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class Tokens(TimestampMixin, SQLModel, table=True):
+    token: str = Field(primary_key=True)
     user_id: int = Field(sa_column=Column(
         Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False
     ))
-    name: str = Field(nullable=False)
-    url: str = Field(nullable=False)
+    exp: int = Field(nullable=False)

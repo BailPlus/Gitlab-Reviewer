@@ -1,7 +1,8 @@
 from typing import override
 from sqlmodel import Session
 from sqlalchemy import Engine
-from ..model.users import Users, Tokens
+from ..model.users import Users
+from ..model.tokens import Tokens
 from ..interface.auth import (
     ISqlUserinfoGetter,
     ISqlUserinfoUpdater,
