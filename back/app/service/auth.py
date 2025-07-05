@@ -1,5 +1,6 @@
 from typing import override
 from httpx import AsyncClient
+from gitlab import Gitlab
 from ..interface.auth import (
     IGitlabTokenGetter,
     IGitlabUserinfoGetter,
@@ -14,7 +15,7 @@ from ..interface.auth import (
 )
 from ..core.config import settings
 from ..errors.auth import *
-import time
+import time, gitlab.exceptions
 
 class GitlabTokenGetter(IGitlabTokenGetter):
     """获取token"""
@@ -28,8 +29,8 @@ class GitlabTokenGetter(IGitlabTokenGetter):
             token_resp = await client.post(
                 settings.gitlab_url + "/oauth/token",
                 data={
-                    "client_id": settings.gitlab_appid,
-                    "client_secret": settings.gitlab_appsecret,
+                    "client_id": settings.gitlab_client_id,
+                    "client_secret": settings.gitlab_client_secret,
                     "code": code,
                     "grant_type": "authorization_code",
                     "redirect_uri": settings.gitlab_oauth_redirect_url
@@ -52,7 +53,7 @@ class GitlabTokenGetter(IGitlabTokenGetter):
         return self._token_age
 
 
-class GitlabUserinfoGetter(IGitlabUserinfoGetter):
+class OldGitlabUserinfoGetter(IGitlabUserinfoGetter):
     _username: str
     _email: str
 
@@ -89,6 +90,44 @@ class GitlabUserinfoGetter(IGitlabUserinfoGetter):
             raise SyntaxError("请先调用get_userinfo方法")
         return self._email
 
+
+class GitlabUserinfoGetter(IGitlabUserinfoGetter):
+    """获取新用户的Gitlab信息"""
+    gl: Gitlab
+
+    def __init__(self, gl: Gitlab):
+        self.gl = gl
+
+    @override
+    async def get(self, token: str):
+        """获取用户信息"""
+        self.gl.oauth_token = token
+        self.gl._set_auth_info()
+        try:
+            self.gl.auth()
+        except gitlab.exceptions.GitlabAuthenticationError as e:
+            raise InvalidGitlabToken from e
+
+    @property
+    @override
+    def uid(self):
+        if not self.gl.user:
+            raise SyntaxError("请先调用 get 方法")
+        return self.gl.user.id
+
+    @property
+    @override
+    def username(self):
+        if not self.gl.user:
+            raise SyntaxError("请先调用 get 方法")
+        return self.gl.user.username
+
+    @property
+    @override
+    def email(self):
+        if not self.gl.user:
+            raise SyntaxError("请先调用 get 方法")
+        return self.gl.user.email
 
 class UserinfoGetter(IUserinfoGetter):
     sql_userinfo_getter: ISqlUserinfoGetter

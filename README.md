@@ -33,7 +33,7 @@
 
 - 用户认证相关：
   - Gitlab oauth login redirect
-  ```
+  ```http
   GET /_/auth/login
   ```
   ```
@@ -45,6 +45,7 @@
   ```
   ```http
   Set-Cookie: token=string
+  Location: /
   ```
   - 用户登出
   ```http
@@ -60,7 +61,7 @@
   ```http
   GET /_/auth/profile
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -73,10 +74,10 @@
 
 - 仓库管理相关：
   - 获取用户绑定的仓库列表
-  ```
+  ```http
   GET /api/repositories
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -89,14 +90,14 @@
   }
   ```
   - 绑定新仓库
-  ```
+  ```http
   POST /api/repositories
   
   {
     "repo_name": "user1/repo1"
   }
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -104,10 +105,10 @@
   }
   ```
   - 解绑仓库
-  ```
+  ```http
   DELETE /api/repositories/{repo_id}
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -116,34 +117,54 @@
   ```
 - 仓库分析相关：
   - 对仓库进行宏观分析（异步请求）
+  ```http
+  POST /api/analysis
+
+  {
+    "repo_id": 1
+  }
   ```
-  POST /api/repositories/{repo_id}/analyze
-  ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
     "data": {}
   }
   ```
-  获取仓库分析结果以及仓库代码质量指标
+  - 获取仓库分析结果以及仓库代码质量指标
+  ```http
+  GET /api/analysis/{analysis_id}
   ```
-  GET /api/repositories/{repo_id}/analysis
+  ```json
+  {
+    "status": 0/?/?,
+    "info": "ok/pending/failed",
+    "data": {
+      "result": "分析结果",
+      "score": 0,
+      "analize_time": 17xxxxxxxx
+    }
+  }
   ```
+  - 获取分析结果历史
+  ```http
+  POST /api/analysis/history
+
+  {
+    "repo_id": 1
+  }
   ```
+  ```json
   {
     "status": 0,
     "info": "ok",
     "data": {
-      "status": "pending/success",
-      "result": "分析结果",
-      "score": 0,
-      "analise_time": 17xxxxxxxx
+      "analisis_history": [3, 2, 1, ...] // 返回一组 analysis_id，按时间逆序排列
     }
   }
   ```
 
-- 提交评审相关：
+- commit评审相关：
   - POST /api/webhooks/gitlab - GitLab Webhook 接收端点
   - GET /api/commits/{commit_id}/review - 获取提交的 AI 评审结果
   - POST /api/commits/{commit_id}/review - 手动触发提交评审
@@ -152,29 +173,28 @@
 
 - 通知推送相关：
   - 获取通知设置
-  ```
+  ```http
   GET /api/notifications/settings
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
     "data": {
-        "notifications": {
-        "email": {
-          "enabled": true,
-          "address": "user@example.com"
-        },
-        "telegram": {
-          "enabled": true,
-          "chat_id": "string"
-        }
+      "notifications": {
+      "email": {
+        "enabled": true,
+        "address": "user@example.com"
+      },
+      "telegram": {
+        "enabled": true,
+        "chat_id": "string"
       }
     }
   }
   ```
-  - POST /api/notifications/settings - 配置通知设置
-  ```
+  - 配置通知设置
+  ```http
   POST /api/notifications/settings
   
   {
@@ -190,7 +210,7 @@
     }
   }
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -210,10 +230,10 @@
   ```
 
   - 测试通知配置
-  ```
+  ```http
   POST /api/notifications/test
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -251,7 +271,7 @@ uv run run.py
 
 数据库：MariaDB
 
-#### `token` 表
+#### `tokens` 表
 
 | 列名          | 类型             | 可否为空 | 键    | 默认值              | 额外                          |
 | ------------ | ---------------- | ---- | ------- | ------------------ | ---------------------------- |
@@ -267,7 +287,6 @@ uv run run.py
 | -------------- | --------------- | ---- | --- | ------------------ | ---------------------------- |
 | id             | BIGINT UNSIGNED | NO   | PRI |                    |                              |
 | username       | VARCHAR(50)     | NO   | UNI |                    |                              |
-| password\_hash | VARCHAR(255)    | NO   |     |                    |                              |
 | email          | VARCHAR(100)    | NO   | UNI |                    |                              |
 | created\_at    | DATETIME        | NO   |     | CURRENT\_TIMESTAMP |                              |
 | updated\_at    | DATETIME        | NO   |     | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
@@ -277,19 +296,26 @@ uv run run.py
 | 列名          | 类型              | 可否为空 | 键       | 默认值                | 额外              |
 | ----------- | --------------- | ---- | ------- | ------------------ | --------------- |
 | id          | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT |
-| user\_id    | BIGINT UNSIGNED | NO   | MUL(FK) |                    |                 |
-| name        | VARCHAR(200)    | NO   |         |                    |                 |
-| url         | VARCHAR(500)    | NO   |         |                    |                 |
+| analysis\_id | BIGINT UNSIGNED | YES（双向外键不能同时为非空）  | MUL(FK) |                    |                 |
 | created\_at | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
-| bound\_at   | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
 
-#### `repository_analysis` 表
+#### `repository_bindings` 表
+
+| 列名          | 类型              | 可否为空 | 键       | 默认值                | 额外              |
+| ----------- | --------------- | ---- | ------- | ------------------ | --------------- |
+| id          | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT |
+| repo\_id | BIGINT UNSIGNED | NO  | MUL(FK) |                    |
+| user\_id    | BIGINT UNSIGNED | NO  | MUL(FK) |                    |
+| created\_at | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
+
+#### `repository_analyses` 表
 
 | 列名             | 类型              | 可否为空 | 键       | 默认值                | 额外              |
 | -------------- | --------------- | ---- | ------- | ------------------ | --------------- |
 | id             | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT |
 | repo\_id       | BIGINT UNSIGNED | NO   | MUL(FK) |                    |                 |
-| analysis\_json | JSON            | NO   |         |                    |                 |
+| status       | ENUM('pending','completed','failed')           | NO   |         | pending            |                              |
+| analysis\_json | JSON            | YES   |         |                    |                 |
 | created\_at    | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
 
 #### `repository_metrics` 表
@@ -309,7 +335,7 @@ uv run run.py
 | id           | BIGINT UNSIGNED                       | NO   | PRI     |                    | AUTO\_INCREMENT              |
 | commit\_id   | BIGINT UNSIGNED                       | NO   | UNI(FK) |                    |                              |
 | review\_json | JSON                                  | NO   |         |                    |                              |
-| status       | ENUM('pending','completed','applied') | NO   |         | pending            |                              |
+| status       | ENUM('pending','completed','failed')           | NO   |         | pending            |                              |
 | reviewed\_at | DATETIME                              | YES  |         |                    |                              |
 | updated\_at  | DATETIME                              | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
 
