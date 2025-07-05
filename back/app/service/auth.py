@@ -28,8 +28,8 @@ class GitlabTokenGetter(IGitlabTokenGetter):
             token_resp = await client.post(
                 settings.gitlab_url + "/oauth/token",
                 data={
-                    "client_id": settings.gitlab_appid,
-                    "client_secret": settings.gitlab_appsecret,
+                    "client_id": settings.gitlab_client_id,
+                    "client_secret": settings.gitlab_client_secret,
                     "code": code,
                     "grant_type": "authorization_code",
                     "redirect_uri": settings.gitlab_oauth_redirect_url

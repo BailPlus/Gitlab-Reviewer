@@ -7,8 +7,8 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 30
     gitlab_url: str = ""
     gitlab_oauth_redirect_url: str = ""
-    gitlab_appid: str = ""
-    gitlab_appsecret: str = ""
+    gitlab_client_id: str = ""
+    gitlab_client_secret: str = ""
 
     class Config:
         env_file = ".env"   # 配置文件
