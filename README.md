@@ -33,7 +33,7 @@
 
 - 用户认证相关：
   - Gitlab oauth login redirect
-  ```
+  ```http
   GET /_/auth/login
   ```
   ```
@@ -45,6 +45,7 @@
   ```
   ```http
   Set-Cookie: token=string
+  Location: /
   ```
   - 用户登出
   ```http
@@ -60,7 +61,7 @@
   ```http
   GET /_/auth/profile
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -73,10 +74,10 @@
 
 - 仓库管理相关：
   - 获取用户绑定的仓库列表
-  ```
+  ```http
   GET /api/repositories
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -89,14 +90,14 @@
   }
   ```
   - 绑定新仓库
-  ```
+  ```http
   POST /api/repositories
   
   {
     "repo_name": "user1/repo1"
   }
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -104,10 +105,10 @@
   }
   ```
   - 解绑仓库
-  ```
+  ```http
   DELETE /api/repositories/{repo_id}
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -116,10 +117,10 @@
   ```
 - 仓库分析相关：
   - 对仓库进行宏观分析（异步请求）
-  ```
+  ```http
   POST /api/repositories/{repo_id}/analyze
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -127,10 +128,10 @@
   }
   ```
   获取仓库分析结果以及仓库代码质量指标
-  ```
+  ```http
   GET /api/repositories/{repo_id}/analysis
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -143,7 +144,7 @@
   }
   ```
 
-- 提交评审相关：
+- commit评审相关：
   - POST /api/webhooks/gitlab - GitLab Webhook 接收端点
   - GET /api/commits/{commit_id}/review - 获取提交的 AI 评审结果
   - POST /api/commits/{commit_id}/review - 手动触发提交评审
@@ -152,29 +153,28 @@
 
 - 通知推送相关：
   - 获取通知设置
-  ```
+  ```http
   GET /api/notifications/settings
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
     "data": {
-        "notifications": {
-        "email": {
-          "enabled": true,
-          "address": "user@example.com"
-        },
-        "telegram": {
-          "enabled": true,
-          "chat_id": "string"
-        }
+      "notifications": {
+      "email": {
+        "enabled": true,
+        "address": "user@example.com"
+      },
+      "telegram": {
+        "enabled": true,
+        "chat_id": "string"
       }
     }
   }
   ```
-  - POST /api/notifications/settings - 配置通知设置
-  ```
+  - 配置通知设置
+  ```http
   POST /api/notifications/settings
   
   {
@@ -190,7 +190,7 @@
     }
   }
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -210,10 +210,10 @@
   ```
 
   - 测试通知配置
-  ```
+  ```http
   POST /api/notifications/test
   ```
-  ```
+  ```json
   {
     "status": 0,
     "info": "ok",
@@ -251,7 +251,7 @@ uv run run.py
 
 数据库：MariaDB
 
-#### `token` 表
+#### `tokens` 表
 
 | 列名          | 类型             | 可否为空 | 键    | 默认值              | 额外                          |
 | ------------ | ---------------- | ---- | ------- | ------------------ | ---------------------------- |
@@ -267,7 +267,6 @@ uv run run.py
 | -------------- | --------------- | ---- | --- | ------------------ | ---------------------------- |
 | id             | BIGINT UNSIGNED | NO   | PRI |                    |                              |
 | username       | VARCHAR(50)     | NO   | UNI |                    |                              |
-| password\_hash | VARCHAR(255)    | NO   |     |                    |                              |
 | email          | VARCHAR(100)    | NO   | UNI |                    |                              |
 | created\_at    | DATETIME        | NO   |     | CURRENT\_TIMESTAMP |                              |
 | updated\_at    | DATETIME        | NO   |     | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |

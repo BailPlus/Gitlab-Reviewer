@@ -1,4 +1,4 @@
-from typing import override
+from typing import Any, override
 from sqlmodel import SQLModel, create_engine, Session
 from ..core.config import settings
 from ..interface import IContextManager
@@ -12,6 +12,9 @@ SQLModel.metadata.create_all(engine)
 
 class SqlContextManager(IContextManager):
     session: Session
+
+    def __init__(self, session: Session):
+        self.session = session
 
     @override
     def __enter__(self):
