@@ -30,12 +30,11 @@ class SqlUserRepoGetter(SqlContextManager, ISqlUserRepoGetter):
 
 class SqlRepoAdder(SqlContextManager, ISqlRepoAdder):
     @override
-    def add(self, user_id: int, repo_id: int, name: str, url: str) -> None:
+    def add(self, user_id: int, repo_id: int, name: str) -> None:
         self.session.add(Repositories(
             id=repo_id,
             user_id=user_id,
             name=name,
-            url=url
         ))
         self.session.commit()
 

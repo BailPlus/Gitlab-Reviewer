@@ -1,5 +1,6 @@
-from typing import Any, override
+from typing import override
 from sqlmodel import SQLModel, create_engine, Session
+from sqlalchemy import Engine
 from ..core.config import settings
 from ..interface import IContextManager
 # 以下导入仅用于SQLModel.metadata.create_all(engine)时检测到所有的表
@@ -13,8 +14,8 @@ SQLModel.metadata.create_all(engine)
 class SqlContextManager(IContextManager):
     session: Session
 
-    def __init__(self, session: Session):
-        self.session = session
+    def __init__(self, engine: Engine):
+        self.session = Session(engine)
 
     @override
     def __enter__(self):

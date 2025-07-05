@@ -41,7 +41,7 @@ class ISqlUserRepoGetter(IContextManager):
 class ISqlRepoAdder(IContextManager):
     """数据库绑定新仓库的接口"""
     @abstractmethod
-    def add(self, user_id: int, repo_id: int, name: str, url: str):
+    def add(self, user_id: int, repo_id: int, name: str):
         """绑定"""
 
 

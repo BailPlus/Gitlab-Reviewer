@@ -34,9 +34,9 @@ class RepoAdder(IRepoAdder):
     @override
     def add(self, user_id: int, repo_name: str):
         #TODO: 通过gitlab sdk获取仓库信息
+        raise NotImplementedError
         repo_id = int()
-        url = str()
-        self.sql_repo_adder.add(user_id, repo_id, repo_name, url)
+        self.sql_repo_adder.add(user_id, repo_id, repo_name)
 
 
 class RepoDeleter(IRepoDeleter):
