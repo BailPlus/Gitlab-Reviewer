@@ -27,7 +27,7 @@ router = APIRouter(prefix='/_/auth')
 @router.get('/login')
 async def login():
     """登录"""
-    return RedirectResponse(url=settings.gitlab_url + '/oauth/authorize?client_id=' + settings.gitlab_appid + '&redirect_uri=' + settings.gitlab_oauth_redirect_url + '&response_type=code&scope=api')
+    return RedirectResponse(url=settings.gitlab_url + '/oauth/authorize?client_id=' + settings.gitlab_client_id + '&redirect_uri=' + settings.gitlab_oauth_redirect_url + '&response_type=code&scope=api')
 
 
 @router.get('/callback')

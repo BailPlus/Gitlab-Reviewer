@@ -1,4 +1,7 @@
-from fastapi import Depends
+from typing import Annotated
+from fastapi import Depends, Cookie
+from gitlab import Gitlab
+from ..schema.cookies import CookiesSchema
 from ..interface.auth import (
     IGitlabTokenGetter,
     IGitlabUserinfoGetter,
@@ -26,6 +29,7 @@ from ..db.auth import (
     SqlTokenGetter,
     SqlTokenSaver
 )
+from .config import get_gitlab_obj
 
 
 def get_sql_userinfo_getter() -> ISqlUserinfoGetter:
@@ -43,8 +47,10 @@ def get_sql_token_saver() -> ISqlTokenSaver:
 def get_gitlab_token_getter() -> IGitlabTokenGetter:
     return GitlabTokenGetter()
 
-def get_gitlab_userinfo_getter() -> IGitlabUserinfoGetter:
-    return GitlabUserinfoGetter()
+def get_gitlab_userinfo_getter(
+        gl: Gitlab = Depends(get_gitlab_obj)
+) -> IGitlabUserinfoGetter:
+    return GitlabUserinfoGetter(gl)
 
 def get_userinfo_getter(
         sql_userinfo_getter: ISqlUserinfoGetter = Depends(get_sql_userinfo_getter)
@@ -65,3 +71,13 @@ def get_token_saver(
         sql_token_manager: ISqlTokenSaver = Depends(get_sql_token_saver)
 ) -> ITokenSaver:
     return TokenSaver(sql_token_manager)
+
+def get_logged_gitlab_obj(
+        cookie: Annotated[CookiesSchema, Cookie()],
+        gl: Gitlab = Depends(get_gitlab_obj)
+):
+    """获取登录用户的Gitlab对象"""
+    gl.oauth_token = cookie.token
+    gl._set_auth_info()
+    gl.auth()
+    return gl

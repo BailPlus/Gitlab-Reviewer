@@ -14,3 +14,8 @@ class InvalidGitlabToken(AuthException):
     code = 401
     status = 102
     info = "无效的gitlab token"
+
+class PermissionDenied(AuthException):
+    code = 403
+    status = 103
+    info = "权限不足"
