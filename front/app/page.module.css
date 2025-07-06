@@ -1,0 +1,380 @@
+/* Reset and base styles */
+:root {
+  --background-rgb: 255, 255, 255;
+  --foreground-rgb: 17, 24, 39;
+  --sidebar-rgb: 249, 250, 251;
+  --border-rgb: 229, 231, 235;
+  --text-secondary-rgb: 107, 114, 128;
+  --accent-rgb: 79, 70, 229;
+  --accent-hover-rgb: 67, 56, 202;
+  --gitlab-orange: #fc6d26;
+  --gitlab-orange-hover: #e24329;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-rgb: 17, 24, 39;
+    --foreground-rgb: 255, 255, 255;
+    --sidebar-rgb: 31, 41, 55;
+    --border-rgb: 55, 65, 81;
+    --text-secondary-rgb: 156, 163, 175;
+    --accent-rgb: 99, 102, 241;
+    --accent-hover-rgb: 129, 140, 248;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.containerWrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.loginOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  flex-direction: column;
+}
+
+.loginContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10vh; /* Increase gap to push title up */
+  z-index: 1;
+}
+
+.projectTitle {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+  font-family: "Courier New", Courier, monospace;
+  white-space: nowrap;
+}
+
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 3.5rem;
+  background-color: rgb(var(--foreground-rgb));
+  margin-left: 8px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from,
+  to {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgb(var(--foreground-rgb));
+  }
+}
+
+.backgroundGradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(var(--background-rgb), 0.1) 0%,
+    rgba(var(--background-rgb), 0.8) 60%,
+    rgb(var(--background-rgb)) 80%
+  );
+  z-index: -1;
+}
+
+.blurred {
+  filter: blur(4px);
+}
+
+/* Loading state - No longer a full page, but can be used for smaller components */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+/* Login View */
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgb(var(--background-rgb));
+}
+
+.loginButtonLarge {
+  padding: 14px 28px;
+  border-radius: 8px;
+  border: none;
+  background: var(--gitlab-orange);
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loginButtonLarge:hover {
+  background-color: var(--gitlab-orange-hover);
+  transform: translateY(-2px);
+}
+
+/* Logged-in View */
+.container {
+  display: flex;
+  height: 100vh;
+  transition: filter 0.3s ease-in-out;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: rgb(var(--sidebar-rgb));
+  border-right: 1px solid rgb(var(--border-rgb));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+}
+
+.avatar {
+  border-radius: 50%;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  min-width: 0; /* Prevent flex item from overflowing */
+}
+
+.userName,
+.userUsername,
+.userEmail {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.userUsername {
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.repoNav {
+  margin-top: 24px;
+}
+
+.repoTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(var(--text-secondary-rgb));
+  padding: 0 8px 8px 8px;
+}
+
+.repoList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.repoItem {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.repoItem:hover {
+  background-color: rgba(var(--foreground-rgb), 0.05);
+  color: rgb(var(--foreground-rgb));
+}
+
+.settings {
+  padding: 8px;
+}
+
+.settings a {
+  color: rgb(var(--foreground-rgb));
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.settings a:hover {
+  background-color: rgba(var(--foreground-rgb), 0.05);
+  color: rgb(var(--foreground-rgb));
+}
+
+/* Skeleton Styles */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.skeleton {
+  background-color: rgba(var(--border-rgb), 0.7);
+  border-radius: 6px;
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeletonAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeletonText {
+  height: 1em;
+  width: 100px;
+  margin-bottom: 6px;
+}
+
+.skeletonTextShort {
+  height: 0.9em;
+  width: 70px;
+}
+
+.skeletonRepoItem {
+  height: 37px; /* Matches .repoItem padding + font-size */
+  width: 100%;
+}
+
+.skeletonSettings {
+  height: 41px; /* Matches .settings a padding + font-size */
+  width: 100%;
+}
+
+.main {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+
+.mainContent {
+  width: 100%;
+  max-width: 768px;
+  text-align: center;
+}
+
+.placeholder {
+  margin-top: 30vh;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.placeholder h1 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.mainTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgb(var(--text-secondary-rgb));
+  margin: 8px 0 32px 0;
+}
+
+.repoForm {
+  display: flex;
+  gap: 12px;
+}
+
+.repoInput {
+  flex-grow: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgb(var(--border-rgb));
+  font-size: 0.9rem;
+  background-color: rgb(var(--background-rgb));
+  color: rgb(var(--foreground-rgb));
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.repoInput:focus {
+  outline: none;
+  border-color: rgb(var(--accent-rgb));
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+}
+
+.repoButton {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: rgb(var(--accent-rgb));
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.repoButton:hover {
+  background-color: rgb(var(--accent-hover-rgb));
+}
+
+.welcomeMessage {
+  text-align: center;
+  margin-top: 20vh;
+}
