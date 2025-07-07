@@ -230,8 +230,3 @@ tools = [
         }
     },
 ]
-
-
-if __name__ == "__main__":
-    result = get_repo_branches("5c8c09c3ef93e4d7162c944be254a0ebcae6e475b749e3efbccf3a720012b944", 1)
-    print(f"Branches: {result}")
