@@ -59,10 +59,3 @@ def generate_commit_review(oauth_token: str, project_id: int, commit_id: str) ->
     Generate a detailed review of a specific commit in the GitLab repository.
     """
     pass
-
-if __name__ == "__main__":
-    generate_repo_analysis(
-        oauth_token="702fb4799e30569761592474feb158756464a1f9468bff9394e1866f21ddb18c",
-        project_id=1,
-        ref="main"
-    )
