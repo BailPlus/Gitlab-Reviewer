@@ -20,7 +20,7 @@ def function_call(messages: list, oauth_token: str) -> str:
             tool_choice="auto",
         )
         msg = resp.choices[0].message
-
+        messages.append(msg)
         # 模型要调用函数
         if msg.tool_calls:
             tool_calls = msg.tool_calls
@@ -36,9 +36,8 @@ def function_call(messages: list, oauth_token: str) -> str:
                 print(f"函数执行结果: {result}")
                 # 把执行结果塞回对话
                 messages.append({
-                    "role": "function",
+                    "role": "tool",
                     "tool_call_id": tool_call.id,
-                    "name": name,
                     "content": json.dumps(result, ensure_ascii=False)
                 })
             continue
