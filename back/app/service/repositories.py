@@ -1,5 +1,5 @@
 from typing import override
-from httpx import AsyncClient
+from gitlab import Gitlab
 from ..model.repositories import Repositories
 from ..interface.repositories import (
     IRepoGetter,
@@ -11,6 +11,8 @@ from ..interface.repositories import (
     ISqlRepoDeleter
 )
 from ..errors.auth import PermissionDenied
+from ..errors.repositories import *
+import gitlab.exceptions
 
 class RepoGetter(IRepoGetter):
     """获取用户绑定的仓库列表"""
@@ -26,16 +28,23 @@ class RepoGetter(IRepoGetter):
 
 class RepoAdder(IRepoAdder):
     """绑定新仓库"""
+    gl: Gitlab
     sql_repo_adder: ISqlRepoAdder
 
-    def __init__(self, sql_repo_adder: ISqlRepoAdder):
+    def __init__(
+            self, 
+            gl: Gitlab,
+            sql_repo_adder: ISqlRepoAdder
+    ):
+        self.gl = gl
         self.sql_repo_adder = sql_repo_adder
 
     @override
     def add(self, user_id: int, repo_name: str):
-        #TODO: 通过gitlab sdk获取仓库信息
-        raise NotImplementedError
-        repo_id = int()
+        try:
+            repo_id = self.gl.projects.get(repo_name).id
+        except gitlab.exceptions.GitlabGetError as e:
+            raise RepoNotExist from e
         self.sql_repo_adder.add(user_id, repo_id, repo_name)
 
 

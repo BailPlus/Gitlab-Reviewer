@@ -1,4 +1,6 @@
 from fastapi import Depends
+from gitlab import Gitlab
+from .auth import get_logged_gitlab_obj
 from ..interface.repositories import (
     IRepoGetter,
     IRepoAdder,
@@ -40,9 +42,10 @@ def get_repo_getter(
     return RepoGetter(sql_userrepo_getter)
 
 def get_repo_adder(
+    gl: Gitlab = Depends(get_logged_gitlab_obj),
     sql_repo_adder: ISqlRepoAdder = Depends(get_sql_repo_adder)
 ) -> IRepoAdder:
-    return RepoAdder(sql_repo_adder)
+    return RepoAdder(gl, sql_repo_adder)
 
 def get_repo_deleter(
     sql_repo_getter: ISqlRepoGetter = Depends(get_sql_repo_getter),
