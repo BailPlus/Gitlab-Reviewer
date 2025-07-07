@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     gitlab_client_secret: str = ""
     OPENAI_BASE_URL: str = ""
     OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = ""
     class Config:
         env_file = ".env"   # 配置文件
         env_prefix = "GLRV_"    # 环境变量前缀
