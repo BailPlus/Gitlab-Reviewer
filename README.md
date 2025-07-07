@@ -308,12 +308,13 @@ uv run run.py
 | user\_id    | BIGINT UNSIGNED | YES  | MUL(FK) |                    |
 | created\_at | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
 
-#### `repository_analysis` 表
+#### `repository_analyses` 表
 
 | 列名             | 类型              | 可否为空 | 键       | 默认值                | 额外              |
 | -------------- | --------------- | ---- | ------- | ------------------ | --------------- |
 | id             | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT |
 | repo\_id       | BIGINT UNSIGNED | NO   | MUL(FK) |                    |                 |
+| status       | ENUM('pending','completed','failed')           | NO   |         | pending            |                              |
 | analysis\_json | JSON            | NO   |         |                    |                 |
 | created\_at    | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
 
@@ -334,7 +335,7 @@ uv run run.py
 | id           | BIGINT UNSIGNED                       | NO   | PRI     |                    | AUTO\_INCREMENT              |
 | commit\_id   | BIGINT UNSIGNED                       | NO   | UNI(FK) |                    |                              |
 | review\_json | JSON                                  | NO   |         |                    |                              |
-| status       | ENUM('pending','completed')           | NO   |         | pending            |                              |
+| status       | ENUM('pending','completed','failed')           | NO   |         | pending            |                              |
 | reviewed\_at | DATETIME                              | YES  |         |                    |                              |
 | updated\_at  | DATETIME                              | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
 

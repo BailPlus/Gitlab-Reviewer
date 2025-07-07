@@ -3,7 +3,8 @@ from sqlalchemy import Column, Integer, ForeignKey
 from . import TimestampMixin
 
 
-class Tokens(TimestampMixin, SQLModel, table=True):
+class Token(TimestampMixin, SQLModel, table=True):
+    __tablename__ = "tokens" # type: ignore
     token: str = Field(primary_key=True)
     user_id: int = Field(sa_column=Column(
         Integer,

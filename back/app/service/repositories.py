@@ -1,6 +1,6 @@
 from typing import override
 from gitlab import Gitlab
-from ..model.repositories import Repositories
+from ..model.repositories import Repository
 from ..interface.repositories import (
     IRepoGetter,
     IRepoAdder,
@@ -22,7 +22,7 @@ class RepoGetter(IRepoGetter):
         self.sql_repo_getter = sql_repo_getter
 
     @override
-    def get(self, user_id: int) -> list[Repositories]:
+    def get(self, user_id: int) -> list[Repository]:
         return self.sql_repo_getter.get(user_id)
 
 

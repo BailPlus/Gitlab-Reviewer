@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from ..model.repositories import Repositories
+from ..model.repositories import Repository
 from . import IContextManager
 
 
 class IRepoGetter(ABC):
     """获取当前用户所有仓库的接口"""
     @abstractmethod
-    def get(self, user_id: int) -> list[Repositories]:
+    def get(self, user_id: int) -> list[Repository]:
         """获取"""
 
 
@@ -27,14 +27,14 @@ class IRepoDeleter(ABC):
 class ISqlRepoGetter(IContextManager):
     """数据库根据id获取仓库的接口"""
     @abstractmethod
-    def get(self, id: int) -> Repositories:
+    def get(self, id: int) -> Repository:
         """获取"""
 
 
 class ISqlUserRepoGetter(IContextManager):
     """数据库获取当前用户所有仓库的接口"""
     @abstractmethod
-    def get(self, user_id: int) -> list[Repositories]:
+    def get(self, user_id: int) -> list[Repository]:
         """获取"""
 
 

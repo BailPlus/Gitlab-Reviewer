@@ -1,8 +1,8 @@
 from typing import override
 from sqlmodel import Session
 from sqlalchemy import Engine
-from ..model.users import Users
-from ..model.tokens import Tokens
+from ..model.users import User
+from ..model.tokens import Token
 from ..interface.auth import (
     ISqlUserinfoGetter,
     ISqlUserinfoUpdater,
@@ -21,12 +21,12 @@ class SqlUserinfoUpdater(ISqlUserinfoUpdater, SqlContextManager):
 
     @override
     def set(self, uid: int, username: str, email: str):
-        if user := self.session.get(Users, uid):
+        if user := self.session.get(User, uid):
             user.username = username
             user.email = email
             self.session.add(user)
         else:
-            self.session.add(Users(
+            self.session.add(User(
                 id=uid,
                 username=username,
                 email=email
@@ -44,7 +44,7 @@ class SqlTokenGetter(ISqlTokenGetter, SqlContextManager):
 
     @override
     def get(self, token: str):
-        token_info = self.session.get(Tokens, token)
+        token_info = self.session.get(Token, token)
         if not token_info:
             raise InvalidGitlabToken
         self._uid = token_info.user_id
@@ -75,7 +75,7 @@ class SqlUserinfoGetter(ISqlUserinfoGetter, SqlContextManager):
 
     @override
     def get(self, uid: int):
-        userinfo = self.session.get(Users, uid)
+        userinfo = self.session.get(User, uid)
         if not userinfo:
             raise InvalidGitlabToken(info='我们不知道出了什么问题：你的token是有效的，但是找不到你的用户信息')
         self._username = userinfo.username
@@ -104,7 +104,7 @@ class SqlTokenSaver(ISqlTokenSaver, SqlContextManager):
 
     @override
     def save(self, token: str, uid: int, exp: int):
-        self.session.add(Tokens(
+        self.session.add(Token(
             token=token,
             user_id=uid,
             exp=exp
