@@ -17,7 +17,7 @@ def get_repo_tree(oauth_token, project_id, ref=None):
     gl = gitlab.Gitlab(url = settings.gitlab_url, oauth_token = oauth_token)
     gl.auth()
     project = gl.projects.get(project_id)
-    return project.repository_tree(ref=ref, recursive=True)
+    return project.repository_tree(ref=ref, recursive=True, get_all=True)
 
 def get_file_content(oauth_token, project_id, ref, file_path):
     """
