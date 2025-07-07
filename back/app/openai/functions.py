@@ -1,6 +1,15 @@
 import gitlab
 from ..core.config import settings
 
+def get_repo_branches(oauth_token, project_id):
+    """
+    Get the branches of a GitLab repository by project ID.
+    """
+    gl = gitlab.Gitlab(url=settings.gitlab_url, oauth_token=oauth_token)
+    gl.auth()
+    project = gl.projects.get(project_id)
+    return [branch.name for branch in project.branches.list(get_all=True)]
+
 def get_repo_tree(oauth_token, project_id, ref=None):
     """
     Get the GitLab repository info by project ID.
@@ -18,7 +27,8 @@ def get_file_content(oauth_token, project_id, ref, file_path):
     gl.auth()
     project = gl.projects.get(project_id)
     file = project.files.get(file_path = file_path, ref = ref)
-    return file.decode().strip()
+    content_bytes = file.decode()
+    return content_bytes.decode('utf-8') if isinstance(content_bytes, bytes) else content_bytes
 
 def get_project_commits(oauth_token, project_id, ref_name=None, per_page=20):
     """
@@ -79,6 +89,7 @@ def get_branch(oauth_token, project_id, branch_name):
     }
 
 function_map = {
+    "get_repo_branches": get_repo_branches,
     "get_repo_tree": get_repo_tree,
     "get_file_content": get_file_content,
     "get_project_commits": get_project_commits,
@@ -87,6 +98,23 @@ function_map = {
 }
 
 tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_repo_branches",
+            "description": "获取GitLab仓库的分支列表。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "project_id": {
+                        "type": "integer",
+                        "description": "GitLab项目的ID。",
+                    },
+                },
+                "required": ["project_id"],
+            },
+        },
+    },
     {
         "type": "function",
         "function": {
@@ -205,5 +233,5 @@ tools = [
 
 
 if __name__ == "__main__":
-    result = get_file_content("5c8c09c3ef93e4d7162c944be254a0ebcae6e475b749e3efbccf3a720012b944", 1, "main", "README.md")
-    print(f"File content: {result}")
+    result = get_repo_branches("5c8c09c3ef93e4d7162c944be254a0ebcae6e475b749e3efbccf3a720012b944", 1)
+    print(f"Branches: {result}")
