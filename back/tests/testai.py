@@ -24,7 +24,7 @@ messages=[
   ]
 response = client.chat.completions.create(
   model="gpt-4.1",
-  messages=messages,
+  messages=messages, # pyright: ignore[reportArgumentType]
   response_format={
     "type": "text"
   },
@@ -51,11 +51,11 @@ response = client.chat.completions.create(
   presence_penalty=0
 )
 
-tool_call = response.choices[0].message.tool_calls[0]
+tool_call = response.choices[0].message.tool_calls[0] # pyright: ignore[reportOptionalSubscript]
 args = json.loads(tool_call.function.arguments)
 result = get_projects()
 
-messages.append(response.choices[0].message)  # append model's function call message
+messages.append(response.choices[0].message)  # pyright: ignore[reportArgumentType] # append model's function call message
 messages.append({                               # append result message
     "role": "tool",
     "tool_call_id": tool_call.id,
@@ -64,7 +64,7 @@ messages.append({                               # append result message
 
 completion_2 = client.chat.completions.create(
     model="gpt-4.1",
-    messages=messages
+    messages=messages # pyright: ignore[reportArgumentType]
 )
 
 print(completion_2.choices[0].message.content)  # print the final response from the model
