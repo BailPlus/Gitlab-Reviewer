@@ -1,4 +1,5 @@
 from fastapi import Depends
+from gitlab import Gitlab
 from ..interface.auth import (
     IGitlabTokenGetter,
     IGitlabUserinfoGetter,
@@ -26,6 +27,7 @@ from ..db.auth import (
     SqlTokenGetter,
     SqlTokenSaver
 )
+from .config import get_gitlab_obj
 
 
 def get_sql_userinfo_getter() -> ISqlUserinfoGetter:
@@ -43,8 +45,10 @@ def get_sql_token_saver() -> ISqlTokenSaver:
 def get_gitlab_token_getter() -> IGitlabTokenGetter:
     return GitlabTokenGetter()
 
-def get_gitlab_userinfo_getter() -> IGitlabUserinfoGetter:
-    return GitlabUserinfoGetter()
+def get_gitlab_userinfo_getter(
+        gl: Gitlab = Depends(get_gitlab_obj)
+) -> IGitlabUserinfoGetter:
+    return GitlabUserinfoGetter(gl)
 
 def get_userinfo_getter(
         sql_userinfo_getter: ISqlUserinfoGetter = Depends(get_sql_userinfo_getter)

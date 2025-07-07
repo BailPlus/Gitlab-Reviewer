@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from gitlab import Gitlab
 
 class Settings(BaseSettings):
     database_url: str = ""
@@ -16,3 +17,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+def get_gitlab_obj() -> Gitlab:
+    """获取Gitlab实例"""
+    return Gitlab(settings.gitlab_url)
