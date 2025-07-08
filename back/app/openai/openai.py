@@ -1,7 +1,11 @@
 from openai import OpenAI
-import json
+import json, logging
 from .functions import *
+from .prompt import *
 from ..core.config import settings
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 client = OpenAI(
     base_url=settings.openai_base_url,
@@ -31,9 +35,9 @@ def function_call(messages: list, oauth_token: str) -> str:
                 # 仅在函数参数中包含 'oauth_token' 时才注入
                 if "oauth_token" in function_map[name].__code__.co_varnames:
                     args["oauth_token"] = oauth_token
-                print(f"调用函数: {name}, 参数: {args}")
+                logger.info(f"调用函数: {name}, 参数: {args}")
                 result = function_map[name](**args)
-                print(f"函数执行结果: {result}")
+                logger.info(f"函数执行结果: \n{result}")
                 # 把执行结果塞回对话
                 messages.append({
                     "role": "tool",
@@ -42,14 +46,14 @@ def function_call(messages: list, oauth_token: str) -> str:
                 })
             continue
 
-        print(msg.content)
+        logger.info(f"消息内容: \n{msg.content}")
         break
     return msg.content
 def generate_repo_analysis(oauth_token: str, project_id: int, ref: str = None) -> str:
     """
     Generate a detailed analysis of the GitLab repository.
     """
-    messages = [{"role": "user", "content": f"帮我全方位详细分析项目 project_id为{project_id} 这个仓库，分支为 {ref}，你可以读取仓库文件，给出分析报告。"}]
+    messages = [{"role": "user", "content": repo_analysis_prompt.format(project_id=project_id, ref=ref)}]
     return function_call(messages, oauth_token)
 
 
