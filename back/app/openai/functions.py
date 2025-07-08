@@ -1,6 +1,15 @@
 import gitlab
 from ..core.config import settings
 
+def get_repo_info(oauth_token, project_id):
+    """
+    Get the GitLab repository info by project ID.
+    """
+    gl = gitlab.Gitlab(url=settings.gitlab_url, oauth_token=oauth_token)
+    gl.auth()
+    project = gl.projects.get(project_id)
+    return project.attributes
+
 def get_repo_branches(oauth_token, project_id):
     """
     Get the branches of a GitLab repository by project ID.
@@ -89,6 +98,7 @@ def get_branch(oauth_token, project_id, branch_name):
     }
 
 function_map = {
+    "get_repo_info": get_repo_info,
     "get_repo_branches": get_repo_branches,
     "get_repo_tree": get_repo_tree,
     "get_file_content": get_file_content,
@@ -98,6 +108,23 @@ function_map = {
 }
 
 tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_repo_info",
+            "description": "获取GitLab仓库的基本信息。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "project_id": {
+                        "type": "integer",
+                        "description": "GitLab项目的ID。",
+                    },
+                },
+                "required": ["project_id"],
+            },
+        },
+    },
     {
         "type": "function",
         "function": {
