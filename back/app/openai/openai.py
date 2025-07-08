@@ -1,8 +1,9 @@
+from typing import Optional
 from openai import OpenAI
-import json, logging
 from .functions import *
 from .prompt import *
 from ..core.config import settings
+import json, logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ def function_call(messages: list, oauth_token: str) -> str:
         resp = client.chat.completions.create(
             model=settings.openai_model,
             messages=messages,
-            tools=tools,
+            tools=tools, # type: ignore
             tool_choice="auto",
         )
         msg = resp.choices[0].message
@@ -48,8 +49,8 @@ def function_call(messages: list, oauth_token: str) -> str:
 
         logger.info(f"消息内容: \n{msg.content}")
         break
-    return msg.content
-def generate_repo_analysis(oauth_token: str, project_id: int, ref: str = None) -> str:
+    return msg.content or ""
+def generate_repo_analysis(oauth_token: str, project_id: int, ref: Optional[str] = None) -> str:
     """
     Generate a detailed analysis of the GitLab repository.
     """
@@ -62,4 +63,4 @@ def generate_commit_review(oauth_token: str, project_id: int, commit_id: str) ->
     """
     Generate a detailed review of a specific commit in the GitLab repository.
     """
-    pass
+    raise NotImplementedError
