@@ -48,5 +48,5 @@ class ISqlRepoAdder(IContextManager):
 class ISqlRepoDeleter(IContextManager):
     """数据库解绑仓库的接口"""
     @abstractmethod
-    def delete(self, repo_id: int):
+    def delete(self, user_id: int, repo_id: int):
         """解绑"""

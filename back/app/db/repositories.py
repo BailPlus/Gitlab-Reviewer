@@ -1,5 +1,5 @@
 from typing import override
-from sqlmodel import select
+from sqlmodel import select, and_
 from ..model.repositories import Repository
 from ..model.repository_bindings import RepositoryBinding
 from ..model.repository_analyses import RepositoryAnalysis, AnalysisStatus
@@ -25,8 +25,9 @@ class SqlUserRepoGetter(SqlContextManager, ISqlUserRepoGetter):
     @override
     def get(self, user_id: int) -> list[Repository]:
         return list(self.session.exec(
-            select(Repository)\
-                .where(Repository.user_id == user_id)
+            select(Repository)
+                .join(RepositoryBinding, and_(RepositoryBinding.repo_id == Repository.id))
+                .where(RepositoryBinding.user_id == user_id)
         ).all())
 
 
@@ -69,8 +70,27 @@ class SqlRepoAdder(SqlContextManager, ISqlRepoAdder):
 
 class SqlRepoDeleter(SqlContextManager, ISqlRepoDeleter):
     @override
-    def delete(self, repo_id: int) -> None:
-        self.session.delete(
-            self.session.get(Repository, repo_id)
-        )
+    def delete(self, user_id: int, repo_id: int) -> None:
+        # 根据repo_id和user_id获取仓库绑定对象
+        bind = self.session.exec(
+            select(RepositoryBinding)
+                .where(and_(
+                    RepositoryBinding.repo_id == repo_id,
+                    RepositoryBinding.user_id == user_id
+                ))
+        ).first()
+
+        # 删除仓库绑定对象
+        self.session.delete(bind)
         self.session.commit()
+
+        # 检查仓库绑定计数，如果为0，则删除仓库
+        remain_binds = self.session.exec(
+            select(RepositoryBinding)
+                .where(RepositoryBinding.repo_id == repo_id)
+        ).all()
+        if not remain_binds:
+            repo = self.session.get(Repository, repo_id)
+            if repo is not None:
+                self.session.delete(repo)
+                self.session.commit()

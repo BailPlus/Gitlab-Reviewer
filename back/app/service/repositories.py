@@ -5,7 +5,6 @@ from ..interface.repositories import (
     IRepoGetter,
     IRepoAdder,
     IRepoDeleter,
-    ISqlRepoGetter,
     ISqlUserRepoGetter,
     ISqlRepoAdder,
     ISqlRepoDeleter
@@ -50,17 +49,20 @@ class RepoAdder(IRepoAdder):
 
 class RepoDeleter(IRepoDeleter):
     """删除仓库"""
-    sql_repo_getter: ISqlRepoGetter
+    sql_user_repo_getter: ISqlUserRepoGetter
     sql_repo_deleter: ISqlRepoDeleter
 
     def __init__(self,
-                 sql_repo_getter: ISqlRepoGetter,
+                 sql_user_repo_getter: ISqlUserRepoGetter,
                  sql_repo_deleter: ISqlRepoDeleter):
-        self.sql_repo_getter = sql_repo_getter
+        self.sql_user_repo_getter = sql_user_repo_getter
         self.sql_repo_deleter = sql_repo_deleter
 
     @override
     def delete(self, user_id: int, repo_id: int):
-        if self.sql_repo_getter.get(repo_id).user_id != user_id:
+        for repo in self.sql_user_repo_getter.get(user_id):
+            if repo.id == repo_id:
+                break
+        else:
             raise PermissionDenied(info='这不是你的仓库')
-        self.sql_repo_deleter.delete(repo_id)
+        self.sql_repo_deleter.delete(user_id, repo_id)
