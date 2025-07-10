@@ -48,7 +48,7 @@ def get_repo_adder(
     return RepoAdder(gl, sql_repo_adder)
 
 def get_repo_deleter(
-    sql_repo_getter: ISqlRepoGetter = Depends(get_sql_repo_getter),
+    sql_userrepo_getter: ISqlUserRepoGetter = Depends(get_sql_userrepo_getter),
     sql_repo_deleter: ISqlRepoDeleter = Depends(get_sql_repo_deleter)
 ) -> IRepoDeleter:
-    return RepoDeleter(sql_repo_getter, sql_repo_deleter)
+    return RepoDeleter(sql_userrepo_getter, sql_repo_deleter)
