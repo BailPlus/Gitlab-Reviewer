@@ -4,7 +4,6 @@ from pydantic import BaseModel
 class GetRepositoriesOutput(BaseModel):
     """获取用户绑定仓库列表的单个仓库输出"""
     id: int
-    name: str
 
 
 class AddRepositoryInput(BaseModel):

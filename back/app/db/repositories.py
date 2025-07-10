@@ -7,6 +7,8 @@ from ..interface.repositories import (
     ISqlRepoGetter,
     ISqlUserRepoGetter,
     ISqlRepoAdder,
+    ISqlRepoBinder,
+    ISqlRepoAnalysisSetter,
     ISqlRepoDeleter
 )
 from . import SqlContextManager
@@ -33,15 +35,27 @@ class SqlUserRepoGetter(SqlContextManager, ISqlUserRepoGetter):
 
 class SqlRepoAdder(SqlContextManager, ISqlRepoAdder):
     @override
-    def add(self, user_id: int, repo_id: int, name: str) -> None:
+    def add(self, repo_id: int) -> None:
+        self.session.add(Repository(
+            id=repo_id
+        ))
+        self.session.commit()
+
+
+class SqlRepoBinder(SqlContextManager, ISqlRepoBinder):
+    @override
+    def bind(self, user_id: int, repo_id: int):
         self.session.add(RepositoryBinding(
             repo_id=repo_id,
             user_id=user_id
         ))
         self.session.commit()
-        repo = self.session.get(Repository, repo_id)
-        if repo is not None:
-            return
+
+
+class SqlRepoAnalysisSetter(SqlContextManager, ISqlRepoAnalysisSetter):
+    @override
+    def add(self, repo_id: int):
+        # 创建并插入分析对象
         analysis = RepositoryAnalysis(
             repo_id=repo_id,
             status=AnalysisStatus.PENDING
@@ -49,23 +63,30 @@ class SqlRepoAdder(SqlContextManager, ISqlRepoAdder):
         self.session.add(analysis)
         self.session.commit()
         self.session.refresh(analysis)
-        self.session.add(Repository(
-            id=repo_id,
-            analysis_id=analysis.id,
-        ))
+
+        # 在仓库对象中引用分析对象
+        assert (repo := self.session.get(Repository, repo_id)) is not None
+        repo.analysis_id = analysis.id
+        self.session.add(repo)
         self.session.commit()
-        '''
-        analizer = RepoAnalizer(analisis.id)
-        @analizer.callback
-        def callback(result: str):
-            self.session.add(RepositoryAnalysis(    # FIXME: 可能存在session被关闭的风险
-                repo_id=repo_id,
-                status=AnalysisStatus.COMPLETED,
-                analysis_json=result
-            ))
-            self.session.commit()
-        threading.Thread(target=analizer.analyze).start()
-        '''
+
+    @override
+    def set(self, repo_id: int, analysis_json: str):
+        assert (repo := self.session.get(Repository, repo_id)) is not None
+        assert (analysis := self.session.get(RepositoryAnalysis,repo.analysis_id)) is not None
+        analysis.status = AnalysisStatus.COMPLETED
+        analysis.analysis_json = analysis_json
+        self.session.add(analysis)
+        self.session.commit()
+
+
+    @override
+    def set_failed(self, repo_id: int):
+        assert (repo := self.session.get(Repository, repo_id)) is not None
+        assert (analysis := self.session.get(RepositoryAnalysis,repo.analysis_id)) is not None
+        analysis.status = AnalysisStatus.FAILED
+        self.session.add(analysis)
+        self.session.commit()
 
 
 class SqlRepoDeleter(SqlContextManager, ISqlRepoDeleter):

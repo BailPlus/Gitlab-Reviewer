@@ -41,8 +41,30 @@ class ISqlUserRepoGetter(IContextManager):
 class ISqlRepoAdder(IContextManager):
     """数据库绑定新仓库的接口"""
     @abstractmethod
-    def add(self, user_id: int, repo_id: int, name: str):
-        """绑定"""
+    def add(self, repo_id: int):
+        """注册仓库"""
+
+
+class ISqlRepoBinder(IContextManager):
+    """数据库绑定新仓库的接口"""
+    @abstractmethod
+    def bind(self, user_id: int, repo_id: int):
+        """用户绑定仓库"""
+
+
+class ISqlRepoAnalysisSetter(IContextManager):
+    """数据库设置仓库分析结果的接口"""
+    @abstractmethod
+    def add(self, repo_id: int):
+        """增加仓库分析条目并设置状态为pending"""
+
+    @abstractmethod
+    def set(self, repo_id: int, analysis_json: str):
+        """设置仓库分析结果（状态为completed）"""
+
+    @abstractmethod
+    def set_failed(self, repo_id: int):
+        """设置仓库分析状态为failed"""
 
 
 class ISqlRepoDeleter(IContextManager):

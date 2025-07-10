@@ -296,7 +296,7 @@ uv run run.py
 | 列名          | 类型              | 可否为空 | 键       | 默认值                | 额外              |
 | ----------- | --------------- | ---- | ------- | ------------------ | --------------- |
 | id          | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT |
-| analysis\_id | BIGINT UNSIGNED | YES  | MUL(FK) |                    |                 |
+| analysis\_id | BIGINT UNSIGNED | YES（双向外键不能同时为非空）  | MUL(FK) |                    |                 |
 | created\_at | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
 
 #### `repository_bindings` 表
@@ -304,8 +304,8 @@ uv run run.py
 | 列名          | 类型              | 可否为空 | 键       | 默认值                | 额外              |
 | ----------- | --------------- | ---- | ------- | ------------------ | --------------- |
 | id          | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT |
-| repo\_id | BIGINT UNSIGNED | YES  | MUL(FK) |                    |
-| user\_id    | BIGINT UNSIGNED | YES  | MUL(FK) |                    |
+| repo\_id | BIGINT UNSIGNED | NO  | MUL(FK) |                    |
+| user\_id    | BIGINT UNSIGNED | NO  | MUL(FK) |                    |
 | created\_at | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
 
 #### `repository_analyses` 表
@@ -315,7 +315,7 @@ uv run run.py
 | id             | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT |
 | repo\_id       | BIGINT UNSIGNED | NO   | MUL(FK) |                    |                 |
 | status       | ENUM('pending','completed','failed')           | NO   |         | pending            |                              |
-| analysis\_json | JSON            | NO   |         |                    |                 |
+| analysis\_json | JSON            | YES   |         |                    |                 |
 | created\_at    | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
 
 #### `repository_metrics` 表

@@ -32,8 +32,7 @@ def get_repositories(
     uid = token_getter.get(cookies.token)
     repos = repo_getter.get(uid)
     output_models = [repo_models.GetRepositoriesOutput(
-        id=repo.id,
-        name=repo.name
+        id=repo.id
     ) for repo in repos]
     return BaseOutput(data=output_models) # pyright: ignore[reportCallIssue]
 
