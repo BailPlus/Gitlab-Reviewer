@@ -10,9 +10,9 @@ from ..interface.repositories import (
     ISqlUserRepoGetter,
     ISqlRepoAdder,
     ISqlRepoBinder,
-    ISqlRepoAnalysisSetter,
     ISqlRepoDeleter
 )
+from ..interface.analysis import ISqlAnalysisSetter
 from ..errors.auth import PermissionDenied
 from ..errors.repositories import *
 import gitlab.exceptions
@@ -37,7 +37,7 @@ class RepoAdder(IRepoAdder):
     sql_userrepo_getter: ISqlUserRepoGetter
     sql_repo_adder: ISqlRepoAdder
     sql_repo_binder: ISqlRepoBinder
-    sql_repo_analysis_setter: ISqlRepoAnalysisSetter
+    sql_repo_analysis_setter: ISqlAnalysisSetter
 
     def __init__(
             self, 
@@ -46,7 +46,7 @@ class RepoAdder(IRepoAdder):
             sql_userrepo_getter: ISqlUserRepoGetter,
             sql_repo_adder: ISqlRepoAdder,
             sql_repo_binder: ISqlRepoBinder,
-            sql_repo_analysis_setter: ISqlRepoAnalysisSetter
+            sql_repo_analysis_setter: ISqlAnalysisSetter
     ):
         self.gl = gl
         self.sql_repo_getter = sql_repo_getter

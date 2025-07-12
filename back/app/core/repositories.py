@@ -9,9 +9,9 @@ from ..interface.repositories import (
     ISqlUserRepoGetter,
     ISqlRepoAdder,
     ISqlRepoBinder,
-    ISqlRepoAnalysisSetter,
     ISqlRepoDeleter
 )
+from ..interface.analysis import ISqlAnalysisSetter
 from ..service.repositories import (
     RepoGetter,
     RepoAdder,
@@ -23,9 +23,9 @@ from ..db.repositories import (
     SqlUserRepoGetter,
     SqlRepoAdder,
     SqlRepoBinder,
-    SqlRepoAnalysisSetter,
     SqlRepoDeleter
 )
+from ..db.analysis import SqlRepoAnalysisSetter
 
 
 def get_sql_repo_getter() -> ISqlRepoGetter:
@@ -40,7 +40,7 @@ def get_sql_repo_adder() -> ISqlRepoAdder:
 def get_sql_repo_binder() -> ISqlRepoBinder:
     return SqlRepoBinder(engine)
 
-def get_sql_repo_analysis_setter() -> ISqlRepoAnalysisSetter:
+def get_sql_repo_analysis_setter() -> ISqlAnalysisSetter:
     return SqlRepoAnalysisSetter(engine)
 
 def get_sql_repo_deleter() -> ISqlRepoDeleter:
@@ -57,7 +57,7 @@ def get_repo_adder(
     sql_userrepo_getter: ISqlUserRepoGetter = Depends(get_sql_userrepo_getter),
     sql_repo_adder: ISqlRepoAdder = Depends(get_sql_repo_adder),
     sql_repo_binder: ISqlRepoBinder = Depends(get_sql_repo_binder),
-    sql_repo_analysis_setter: ISqlRepoAnalysisSetter = Depends(get_sql_repo_analysis_setter)
+    sql_repo_analysis_setter: ISqlAnalysisSetter = Depends(get_sql_repo_analysis_setter)
 ) -> IRepoAdder:
     return RepoAdder(gl, sql_repo_getter, sql_userrepo_getter, sql_repo_adder, sql_repo_binder, sql_repo_analysis_setter)
 
