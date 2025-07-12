@@ -80,8 +80,7 @@ async def profile(
     token = cookies.token
     uid = token_getter.get(token)
     userinfo_getter.get(uid)
-    response = auth_models.ProfileOutput(
+    return BaseOutput(data=auth_models.ProfileOutput(
         username=userinfo_getter.username,
         email=userinfo_getter.email
-    )
-    return BaseOutput(data=response) # pyright: ignore[reportCallIssue]
+    ))

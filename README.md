@@ -137,7 +137,7 @@
   ```
   ```json
   {
-    "status": 0/?/?,
+    "status": 0/301/302,
     "info": "ok/pending/failed",
     "data": {
       "result": "分析结果",
@@ -148,11 +148,7 @@
   ```
   - 获取分析结果历史
   ```http
-  POST /api/analysis/history
-
-  {
-    "repo_id": 1
-  }
+  GET /api/analysis/history?repo_id=1' UNION SELECT flag FROM flag; -- -
   ```
   ```json
   {

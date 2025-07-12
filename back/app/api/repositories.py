@@ -12,7 +12,7 @@ from ..core.repositories import (
     get_repo_adder,
     get_repo_deleter,
 )
-from ..schema import BaseOutput
+from ..schema import BaseOutput, EmptyOutput
 from ..schema.cookies import CookiesSchema
 from ..schema import repositories as repo_models
 
@@ -34,10 +34,10 @@ def get_repositories(
     output_models = [repo_models.GetRepositoriesOutput(
         id=repo.id
     ) for repo in repos]
-    return BaseOutput(data=output_models) # pyright: ignore[reportCallIssue]
+    return BaseOutput(data=output_models)
 
 
-@router.post('/', response_model=BaseOutput[repo_models.AddRepositoryOutput])
+@router.post('/', response_model=EmptyOutput)
 def add_repository(
     input_schema: repo_models.AddRepositoryInput,
     cookies: Annotated[CookiesSchema, Cookie()],
@@ -48,10 +48,10 @@ def add_repository(
     uid = token_getter.get(cookies.token)
     repo_name = input_schema.repo_name
     repo_adder.add(uid, repo_name)
-    return BaseOutput(data=repo_models.AddRepositoryOutput()) # pyright: ignore[reportCallIssue]
+    return EmptyOutput()
 
 
-@router.delete('/{id}', response_model=BaseOutput[repo_models.DeleteRepositoryOutput])
+@router.delete('/{id}', response_model=EmptyOutput)
 def delete_repository(
     id: int,
     cookies: Annotated[CookiesSchema, Cookie()],
@@ -64,4 +64,4 @@ def delete_repository(
         user_id=uid,
         repo_id=id
     )
-    return BaseOutput(data=repo_models.DeleteRepositoryOutput()) # pyright: ignore[reportCallIssue]
+    return EmptyOutput()

@@ -9,13 +9,3 @@ class GetRepositoriesOutput(BaseModel):
 class AddRepositoryInput(BaseModel):
     """绑定新仓库输入"""
     repo_name: str
-
-
-class AddRepositoryOutput(BaseModel):
-    """绑定新仓库输出"""
-    pass
-
-
-class DeleteRepositoryOutput(BaseModel):
-    """解绑仓库输出"""
-    pass
