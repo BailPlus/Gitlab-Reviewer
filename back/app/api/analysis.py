@@ -9,7 +9,7 @@ router = APIRouter(prefix='/api/analysis')
 
 
 @router.post('/', response_model=EmptyOutput)
-def post_analysis(
+async def post_analysis(
     input_schema: analysis_models.PostAnalysisInput,
     cookies: Annotated[CookiesSchema, Cookie()],
     token_getter: ITokenGetter = Depends(get_token_getter),
@@ -20,7 +20,7 @@ def post_analysis(
 
 
 @router.get('/history', response_model=BaseOutput[analysis_models.GetAnalysisHistoryOutput])
-def get_analysis_history(
+async def get_analysis_history(
     repo_id: int,
     cookies: Annotated[CookiesSchema, Cookie()],
     token_getter: ITokenGetter = Depends(get_token_getter),
@@ -32,7 +32,7 @@ def get_analysis_history(
 
 
 @router.get('/{analysis_id}', response_model=analysis_models.GetAnalysisOutput)
-def get_analysis(
+async def get_analysis(
     analysis_id: int,
     cookies: Annotated[CookiesSchema, Cookie()],
     token_getter: ITokenGetter = Depends(get_token_getter),

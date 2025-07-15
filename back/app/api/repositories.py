@@ -23,7 +23,7 @@ router = APIRouter(prefix='/api/repositories')
             response_model=BaseOutput[list[
                 repo_models.GetRepositoriesOutput
             ]])
-def get_repositories(
+async def get_repositories(
     cookies: Annotated[CookiesSchema, Cookie()],
     token_getter: ITokenGetter = Depends(get_token_getter),
     repo_getter: IRepoGetter = Depends(get_repo_getter)
@@ -38,7 +38,7 @@ def get_repositories(
 
 
 @router.post('/', response_model=EmptyOutput)
-def add_repository(
+async def add_repository(
     input_schema: repo_models.AddRepositoryInput,
     cookies: Annotated[CookiesSchema, Cookie()],
     token_getter: ITokenGetter = Depends(get_token_getter),
@@ -52,7 +52,7 @@ def add_repository(
 
 
 @router.delete('/{id}', response_model=EmptyOutput)
-def delete_repository(
+async def delete_repository(
     id: int,
     cookies: Annotated[CookiesSchema, Cookie()],
     token_getter: ITokenGetter = Depends(get_token_getter),

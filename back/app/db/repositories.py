@@ -10,7 +10,6 @@ from ..interface.repositories import (
     ISqlRepoBinder,
     ISqlRepoDeleter
 )
-from ..interface.analysis import ISqlAnalysisSetter
 from . import SqlContextManager
 from ..errors.repositories import *
 

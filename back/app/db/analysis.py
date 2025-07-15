@@ -1,8 +1,30 @@
 from typing import override
+from sqlmodel import select, desc
 from . import SqlContextManager
-from ..interface.analysis import ISqlAnalysisSetter
+from ..interface.analysis import (
+    ISqlAnalisisGetter,
+    ISqlAnalysisSetter
+)
 from ..model.repositories import Repository
 from ..model.repository_analyses import RepositoryAnalysis, AnalysisStatus
+from ..errors.analysis import *
+
+
+class SqlRepoAnalysisGetter(SqlContextManager, ISqlAnalisisGetter):
+    @override
+    def get_analysis(self, analysis_id: int) -> RepositoryAnalysis:
+        if not (analysis := self.session.get(RepositoryAnalysis, analysis_id)):
+            raise AnalysisNotExist
+        return analysis
+
+    @override
+    def get_analysis_history(self, repo_id: int) -> list[int]:
+        analyses = self.session.exec(
+            select(RepositoryAnalysis.id)
+                .where(RepositoryAnalysis.repo_id == repo_id)
+                .order_by(desc(RepositoryAnalysis.id))
+        ).all()
+        return list(analyses)
 
 
 class SqlRepoAnalysisSetter(SqlContextManager, ISqlAnalysisSetter):
