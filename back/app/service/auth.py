@@ -17,6 +17,7 @@ from ..core.config import settings
 from ..errors.auth import *
 import time, gitlab.exceptions
 
+
 class GitlabTokenGetter(IGitlabTokenGetter):
     """获取token"""
     _token: str
@@ -51,44 +52,6 @@ class GitlabTokenGetter(IGitlabTokenGetter):
     @override
     def token_age(self) -> int:
         return self._token_age
-
-
-class OldGitlabUserinfoGetter(IGitlabUserinfoGetter):
-    _username: str
-    _email: str
-
-    @override
-    async def get(self, token: str):
-        async with AsyncClient() as client:
-            userinfo_resp = await client.get(
-                url=f"{settings.gitlab_url+'/api/v4/user'}",
-                headers={"Authorization": f"Bearer {token}"}
-            )
-        if userinfo_resp.status_code == 401:
-            raise InvalidGitlabToken(info=userinfo_resp.text)
-        userinfo = userinfo_resp.raise_for_status().json()
-        self._uid = userinfo["id"]
-        self._username = userinfo["username"]
-        self._email = userinfo["email"]
-
-    @property
-    @override
-    def uid(self):
-        return self._uid
-
-    @property
-    @override
-    def username(self):
-        if not hasattr(self, "_username"):
-            raise SyntaxError("请先调用get_userinfo方法")
-        return self._username
-
-    @property
-    @override
-    def email(self):
-        if not hasattr(self, "_email"):
-            raise SyntaxError("请先调用get_userinfo方法")
-        return self._email
 
 
 class GitlabUserinfoGetter(IGitlabUserinfoGetter):
@@ -128,6 +91,7 @@ class GitlabUserinfoGetter(IGitlabUserinfoGetter):
         if not self.gl.user:
             raise SyntaxError("请先调用 get 方法")
         return self.gl.user.email
+
 
 class UserinfoGetter(IUserinfoGetter):
     sql_userinfo_getter: ISqlUserinfoGetter
