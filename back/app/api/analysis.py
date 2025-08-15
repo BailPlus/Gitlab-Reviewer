@@ -1,31 +1,26 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, Cookie
-from ..interface.auth import ITokenGetter
-from ..schema.cookies import CookiesSchema
+from fastapi import APIRouter, Request
 from ..schema import BaseOutput, EmptyOutput, analysis as analysis_models
-from ..core.auth import get_token_getter
+from ..service.auth import get_token_from_cookie
 
 router = APIRouter(prefix='/api/analysis')
 
 
 @router.post('/', response_model=EmptyOutput)
 async def post_analysis(
+    request: Request,
     input_schema: analysis_models.PostAnalysisInput,
-    cookies: Annotated[CookiesSchema, Cookie()],
-    token_getter: ITokenGetter = Depends(get_token_getter),
 ):
-    uid = token_getter.get(cookies.token)
+    token = get_token_from_cookie(request)
     repo_id = input_schema.repo_id
     return EmptyOutput()
 
 
 @router.get('/history', response_model=BaseOutput[analysis_models.GetAnalysisHistoryOutput])
 async def get_analysis_history(
+    request: Request,
     repo_id: int,
-    cookies: Annotated[CookiesSchema, Cookie()],
-    token_getter: ITokenGetter = Depends(get_token_getter),
 ):
-    uid = token_getter.get(cookies.token)
+    token = get_token_from_cookie(request)
     return BaseOutput(data=analysis_models.GetAnalysisHistoryOutput(
         analysis_history=[]
     ))
@@ -33,11 +28,10 @@ async def get_analysis_history(
 
 @router.get('/{analysis_id}', response_model=analysis_models.GetAnalysisOutput)
 async def get_analysis(
+    request: Request,
     analysis_id: int,
-    cookies: Annotated[CookiesSchema, Cookie()],
-    token_getter: ITokenGetter = Depends(get_token_getter),
 ):
-    uid = token_getter.get(cookies.token)
+    token = get_token_from_cookie(request)
     return analysis_models.GetAnalysisOutput(
         analyze_time=0,
         result="",

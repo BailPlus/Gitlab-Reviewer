@@ -1,168 +1,93 @@
-from typing import override
 from httpx import AsyncClient
 from gitlab import Gitlab
-from ..interface.auth import (
-    IGitlabTokenGetter,
-    IGitlabUserinfoGetter,
-    IUserinfoGetter,
-    IUserinfoSetter,
-    ITokenGetter,
-    ITokenSaver,
-    ISqlUserinfoGetter,
-    ISqlUserinfoUpdater,
-    ISqlTokenGetter,
-    ISqlTokenSaver
-)
-from ..core.config import settings
+from fastapi import Request
 from ..errors.auth import *
+from ..core.config import settings
+from ..schema.auth import GitlabToken
+from ..model.tokens import Token
+from ..errors.auth import InvalidGitlabToken
+from ..db import auth as db
 import time, gitlab.exceptions
 
-
-class GitlabTokenGetter(IGitlabTokenGetter):
-    """获取token"""
-    _token: str
-    _token_age: int
-
-    @override
-    async def get_token(self, code: str):
-        """获取token"""
-        async with AsyncClient() as client:
-            token_resp = await client.post(
-                settings.gitlab_url + "/oauth/token",
-                data={
-                    "client_id": settings.gitlab_client_id,
-                    "client_secret": settings.gitlab_client_secret,
-                    "code": code,
-                    "grant_type": "authorization_code",
-                    "redirect_uri": settings.gitlab_oauth_redirect_url
-                }
-            )
-        if token_resp.status_code != 200:
-            raise InvalidGitlabOauthCode(info=token_resp.text)
-        token_info = token_resp.json()
-        self._token = token_info["access_token"]
-        self._token_age = token_info["expires_in"]
-
-    @property
-    @override
-    def token(self) -> str:
-        return self._token
-
-    @property
-    @override
-    def token_age(self) -> int:
-        return self._token_age
+__all__ = [
+    'get_token_from_callback_code',
+    'verify_gitlab_token',
+    'login',
+    'logout',
+    'get_token_from_cookie',
+]
 
 
-class GitlabUserinfoGetter(IGitlabUserinfoGetter):
-    """获取新用户的Gitlab信息"""
-    gl: Gitlab
-
-    def __init__(self, gl: Gitlab):
-        self.gl = gl
-
-    @override
-    async def get(self, token: str):
-        """获取用户信息"""
-        self.gl.oauth_token = token
-        self.gl._set_auth_info()
-        try:
-            self.gl.auth()
-        except gitlab.exceptions.GitlabAuthenticationError as e:
-            raise InvalidGitlabToken from e
-
-    @property
-    @override
-    def uid(self):
-        if not self.gl.user:
-            raise SyntaxError("请先调用 get 方法")
-        return self.gl.user.id
-
-    @property
-    @override
-    def username(self):
-        if not self.gl.user:
-            raise SyntaxError("请先调用 get 方法")
-        return self.gl.user.username
-
-    @property
-    @override
-    def email(self):
-        if not self.gl.user:
-            raise SyntaxError("请先调用 get 方法")
-        return self.gl.user.email
+async def get_token_from_callback_code(code: str) -> GitlabToken:
+    async with AsyncClient() as client:
+        token_resp = await client.post(
+            settings.gitlab_url + "/oauth/token",
+            data={
+                "client_id": settings.gitlab_client_id,
+                "client_secret": settings.gitlab_client_secret,
+                "code": code,
+                "grant_type": "authorization_code",
+                "redirect_uri": settings.gitlab_oauth_redirect_url
+            }
+        )
+    if token_resp.status_code != 200:
+        raise InvalidGitlabOauthCode(info=token_resp.text)
+    token_info = token_resp.json()
+    return GitlabToken(
+        token = token_info["access_token"],
+        token_age = token_info["expires_in"]
+    )
 
 
-class UserinfoGetter(IUserinfoGetter):
-    sql_userinfo_getter: ISqlUserinfoGetter
-    _username: str
-    _email: str
-
-    def __init__(self, sql_userinfo_getter: ISqlUserinfoGetter):
-        self.sql_userinfo_getter = sql_userinfo_getter
-
-    @override
-    def get(self, uid: int):
-        self.sql_userinfo_getter.get(uid)
-        self._username = self.sql_userinfo_getter.username
-        self._email = self.sql_userinfo_getter.email
-
-    @property
-    @override
-    def username(self) -> str:
-        if not hasattr(self, "_username"):
-            raise SyntaxError('请先调用 get 方法')
-        return self._username
-
-    @property
-    @override
-    def email(self) -> str:
-        if not hasattr(self, "_email"):
-            raise SyntaxError('请先调用 get 方法')
-        return self._email
+def verify_gitlab_token(token: str) -> Gitlab:
+    gl = Gitlab(settings.gitlab_url)
+    gl.oauth_token = token
+    gl._set_auth_info()
+    try:
+        gl.auth()
+    except gitlab.exceptions.GitlabAuthenticationError:
+        raise InvalidGitlabToken()
+    return gl
 
 
-class UserinfoSetter(IUserinfoSetter):
-    sql_userinfo_updater: ISqlUserinfoUpdater
-    uid: int    # 用户id
+async def login(code: str) -> Token:
+    # 从gitlab获取token
+    gl_token = await get_token_from_callback_code(code)
+    gl = verify_gitlab_token(gl_token.token)
 
-    def __init__(self, sql_userinfo_updater: ISqlUserinfoUpdater):
-        self.sql_userinfo_updater = sql_userinfo_updater
+    # 从gitlab获取用户信息
+    assert gl.user
+    uid = gl.user.id # type: int
+    username = gl.user.username
+    email = gl.user.email
 
-    @override
-    def init(self, uid:int):
-        self.uid = uid
+    # 向数据库更新用户信息
+    db.save_userinfo(uid, username, email)
 
-    @override
-    def set(self, username: str, email: str):
-        if not hasattr(self, 'uid'):
-            raise SyntaxError("请先初始化")
-        with self.sql_userinfo_updater:
-            self.sql_userinfo_updater.set(self.uid, username, email)
-
-
-class TokenGetter(ITokenGetter):
-    sql_token_getter: ISqlTokenGetter
-
-    def __init__(self, sql_token_getter: ISqlTokenGetter):
-        self.sql_token_getter = sql_token_getter
-
-    @override
-    def get(self, token: str) -> int:
-        self.sql_token_getter.get(token)
-        if time.time() > self.sql_token_getter.exp:
-            raise InvalidGitlabToken
-        return self.sql_token_getter.uid
+    # 保存token到数据库
+    exp = int(time.time()) + gl_token.token_age
+    token_obj = db.save_token(gl_token.token, uid, exp)
+    return token_obj
 
 
-class TokenSaver(ITokenSaver):
-    sql_token_saver: ISqlTokenSaver
+def delete_token_from_db(token: Token) -> None:
+    db.delete_token(token)
 
-    def __init__(self, sql_token_manager: ISqlTokenSaver):
-        self.sql_token_saver = sql_token_manager
 
-    @override
-    def save(self, token: str, uid: int, token_age: int):
-        exp = int(time.time()) + token_age
-        with self.sql_token_saver:
-            self.sql_token_saver.save(token, uid, exp)
+def logout(token: Token):
+    delete_token_from_db(token)
+
+
+def get_token_obj_from_db(token: str) -> Token:
+    return db.get_token_obj(token)
+
+
+def get_token_from_cookie(request: Request) -> Token:
+    token_str = request.cookies.get('token')
+    if token_str is None:
+        raise InvalidGitlabToken(info='未登录')
+    token = get_token_obj_from_db(token_str)
+    if token.is_expired:
+        delete_token_from_db(token)
+        raise InvalidGitlabToken(info='登录已过期')
+    return token

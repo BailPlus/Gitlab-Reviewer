@@ -1,112 +1,59 @@
-from typing import override
-from sqlmodel import Session
-from sqlalchemy import Engine
 from ..model.users import User
 from ..model.tokens import Token
-from ..interface.auth import (
-    ISqlUserinfoGetter,
-    ISqlUserinfoUpdater,
-    ISqlTokenGetter,
-    ISqlTokenSaver
-)
+
 from ..errors.auth import *
-from . import SqlContextManager
+from . import get_session
+
+__all__ = [
+    'save_userinfo',
+    'save_token',
+    'get_token_obj',
+    'delete_token',
+]
 
 
-class SqlUserinfoUpdater(ISqlUserinfoUpdater, SqlContextManager):
-    session: Session
-
-    def __init__(self, engine: Engine):
-        self.session = Session(engine)
-
-    @override
-    def set(self, uid: int, username: str, email: str):
-        if user := self.session.get(User, uid):
-            user.username = username
-            user.email = email
-            self.session.add(user)
-        else:
-            self.session.add(User(
-                id=uid,
-                username=username,
-                email=email
-            ))
-        self.session.commit()
-
-
-class SqlTokenGetter(ISqlTokenGetter, SqlContextManager):
-    session: Session
-    _uid: int
-    _exp: int
-
-    def __init__(self, engine: Engine):
-        self.session = Session(engine)
-
-    @override
-    def get(self, token: str):
-        token_info = self.session.get(Token, token)
-        if not token_info:
-            raise InvalidGitlabToken
-        self._uid = token_info.user_id
-        self._exp = token_info.exp
-
-    @property
-    @override
-    def uid(self) -> int:
-        if not hasattr(self, "_uid"):
-            raise SyntaxError("请先调用get方法")
-        return self._uid
-
-    @property
-    @override
-    def exp(self) -> int:
-        if not hasattr(self, "_exp"):
-            raise SyntaxError("请先调用get方法")
-        return self._exp
-
-
-class SqlUserinfoGetter(ISqlUserinfoGetter, SqlContextManager):
-    session: Session
-    _username: str
-    _email: str
-
-    def __init__(self, engine: Engine):
-        self.session = Session(engine)
-
-    @override
-    def get(self, uid: int):
-        userinfo = self.session.get(User, uid)
-        if not userinfo:
-            raise InvalidGitlabToken(info='我们不知道出了什么问题：你的token是有效的，但是找不到你的用户信息')
-        self._username = userinfo.username
-        self._email = userinfo.email
-
-    @property
-    @override
-    def username(self) -> str:
-        if not hasattr(self, "_username"):
-            raise SyntaxError('请先调用get方法')
-        return self._username
-
-    @property
-    @override
-    def email(self) -> str:
-        if not hasattr(self, "_username"):
-            raise SyntaxError('请先调用get方法')
-        return self._email
-
-
-class SqlTokenSaver(ISqlTokenSaver, SqlContextManager):
-    session: Session
-
-    def __init__(self, engine: Engine):
-        self.session = Session(engine)
-
-    @override
-    def save(self, token: str, uid: int, exp: int):
-        self.session.add(Token(
-            token=token,
-            user_id=uid,
-            exp=exp
+def save_userinfo(uid: int, username: str, email: str):
+    session = get_session()
+    if user := session.get(User, uid):
+        user.username = username
+        user.email = email
+        session.add(user)
+    else:
+        session.add(User(
+            id=uid,
+            username=username,
+            email=email
         ))
-        self.session.commit()
+    session.commit()
+
+
+def get_token_obj(token: str) -> Token:
+    with get_session() as session:
+        token_obj = session.get(Token, token)
+        token_obj and token_obj.user # pyright: ignore[reportUnusedExpression]
+    if token_obj is None:
+        raise InvalidGitlabToken
+    return token_obj
+
+
+def save_token(token: str, uid: int, exp: int):
+    session = get_session()
+    assert (user_obj := session.get(User, uid))
+    token_obj = Token(
+        token=token,
+        user=user_obj,
+        exp=exp
+    ) # pyright: ignore[reportCallIssue]
+    session.add(token_obj)
+    session.commit()
+    session.refresh(token_obj)
+    session.close()
+    return token_obj
+
+
+def delete_token(token: Token):
+    session = get_session()
+    token = session.merge(token)
+    session.delete(token)
+    session.commit()
+    session.close()

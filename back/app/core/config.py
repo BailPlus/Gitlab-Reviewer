@@ -18,8 +18,10 @@ class Settings(BaseSettings):
         env_prefix = "GLRV_"    # 环境变量前缀
 
 
-settings = Settings()
-
 def get_gitlab_obj() -> Gitlab:
     """获取Gitlab实例"""
     return Gitlab(settings.gitlab_url)
+
+
+# 全局实例
+settings = Settings()

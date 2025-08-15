@@ -1,64 +1,68 @@
-from typing import override
 from sqlmodel import select, desc
-from . import SqlContextManager
-from ..interface.analysis import (
-    ISqlAnalisisGetter,
-    ISqlAnalysisSetter
-)
 from ..model.repositories import Repository
 from ..model.repository_analyses import RepositoryAnalysis, AnalysisStatus
+from . import get_session
 from ..errors.analysis import *
 
+__all__ = [
+    "get_analysis",
+    "get_analysis_history",
+    'create_analysis',
+    'update_analysis',
+    'fail_analysis',
+]
 
-class SqlRepoAnalysisGetter(SqlContextManager, ISqlAnalisisGetter):
-    @override
-    def get_analysis(self, analysis_id: int) -> RepositoryAnalysis:
-        if not (analysis := self.session.get(RepositoryAnalysis, analysis_id)):
+
+def get_analysis(analysis_id: int) -> RepositoryAnalysis:
+    with get_session() as session:
+        if not (analysis := session.get(RepositoryAnalysis, analysis_id)):
             raise AnalysisNotExist
-        return analysis
+    return analysis
 
-    @override
-    def get_analysis_history(self, repo_id: int) -> list[int]:
-        analyses = self.session.exec(
+
+def get_analysis_history(repo_id: int) -> list[int]:
+    with get_session() as session:
+        analyses = session.exec(
             select(RepositoryAnalysis.id)
                 .where(RepositoryAnalysis.repo_id == repo_id)
                 .order_by(desc(RepositoryAnalysis.id))
         ).all()
-        return list(analyses)
+    return list(analyses)
 
 
-class SqlRepoAnalysisSetter(SqlContextManager, ISqlAnalysisSetter):
-    @override
-    def add(self, repo_id: int):
+def create_analysis(repo_id: int) -> RepositoryAnalysis:
+    with get_session() as session:
         # 创建并插入分析对象
         analysis = RepositoryAnalysis(
             repo_id=repo_id,
             status=AnalysisStatus.PENDING
         )
-        self.session.add(analysis)
-        self.session.commit()
-        self.session.refresh(analysis)
+        session.add(analysis)
+        session.commit()
+        session.refresh(analysis)
 
         # 在仓库对象中引用分析对象
-        assert (repo := self.session.get(Repository, repo_id)) is not None
-        repo.analysis_id = analysis.id
-        self.session.add(repo)
-        self.session.commit()
+        assert (repo := session.get(Repository, repo_id)) is not None
+        repo.analysis = analysis
+        session.add(repo)
+        session.commit()
+    return analysis
 
-    @override
-    def set(self, repo_id: int, analysis_json: str):
-        assert (repo := self.session.get(Repository, repo_id)) is not None
-        assert (analysis := self.session.get(RepositoryAnalysis,repo.analysis_id)) is not None
+
+def update_analysis(repo_id: int, analysis_json: str):
+    with get_session() as session:
+        assert (repo := session.get(Repository, repo_id)) is not None
+        assert (analysis := session.get(RepositoryAnalysis,repo.analysis_id)) is not None
         analysis.status = AnalysisStatus.COMPLETED
         analysis.analysis_json = analysis_json
-        self.session.add(analysis)
-        self.session.commit()
+        session.add(analysis)
+        session.commit()
 
 
-    @override
-    def set_failed(self, repo_id: int):
-        assert (repo := self.session.get(Repository, repo_id)) is not None
-        assert (analysis := self.session.get(RepositoryAnalysis,repo.analysis_id)) is not None
+def fail_analysis(repo_id: int):
+    with get_session() as session:
+        assert (repo := session.get(Repository, repo_id)) is not None
+        assert (analysis := session.get(RepositoryAnalysis,repo.analysis_id)) is not None
         analysis.status = AnalysisStatus.FAILED
-        self.session.add(analysis)
-        self.session.commit()
+        session.add(analysis)
+        session.commit()

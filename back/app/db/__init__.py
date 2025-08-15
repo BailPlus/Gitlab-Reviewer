@@ -29,4 +29,8 @@ class SqlContextManager(IContextManager):
         self.session.close()
 
 
-__all__ = ["engine", "SqlContextManager"]
+def get_session() -> Session:
+    return Session(engine)
+
+
+__all__ = ["engine", "SqlContextManager", "get_session"]
