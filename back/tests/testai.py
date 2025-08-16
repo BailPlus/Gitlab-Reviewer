@@ -1,5 +1,5 @@
 import gitlab,json
-gl = gitlab.Gitlab('https://gitlab.24kblog.top/', oauth_token='18522453cfa207365e25c0a153db07a97f71494fe965f50c4c0a47f613f6ccc7')
+gl = gitlab.Gitlab('http://gitlab.bail.asia/', oauth_token='c98fe8f1af1eacb67f49597587c1aebd8be7d5e618a18e4ae170fdd95c6184c0')
 
 def get_projects():
     projects = gl.projects.list(owned=True, get_all=True)
@@ -8,7 +8,7 @@ def get_projects():
 
 from openai import OpenAI
 client = OpenAI(
-    base_url="",
+    base_url="http://localhost:11434/v1",
     api_key="",
 )
 messages=[

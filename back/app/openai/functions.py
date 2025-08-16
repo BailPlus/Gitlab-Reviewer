@@ -1,50 +1,39 @@
 import gitlab
-from ..core.config import settings
 
-def get_repo_info(oauth_token, project_id):
+def get_repo_info(gl: gitlab.Gitlab, project_id):
     """
     Get the GitLab repository info by project ID.
     """
-    gl = gitlab.Gitlab(url=settings.gitlab_url, oauth_token=oauth_token)
-    gl.auth()
     project = gl.projects.get(project_id)
     return project.attributes
 
-def get_repo_branches(oauth_token, project_id):
+def get_repo_branches(gl: gitlab.Gitlab, project_id):
     """
     Get the branches of a GitLab repository by project ID.
     """
-    gl = gitlab.Gitlab(url=settings.gitlab_url, oauth_token=oauth_token)
-    gl.auth()
     project = gl.projects.get(project_id)
     return [branch.name for branch in project.branches.list(get_all=True)]
 
-def get_repo_tree(oauth_token, project_id, ref=None):
+def get_repo_tree(gl: gitlab.Gitlab, project_id, ref=None):
     """
     Get the GitLab repository info by project ID.
     """
-    gl = gitlab.Gitlab(url = settings.gitlab_url, oauth_token = oauth_token)
-    gl.auth()
     project = gl.projects.get(project_id)
     return project.repository_tree(ref=ref, recursive=True, get_all=True) # type: ignore
 
-def get_file_content(oauth_token, project_id, ref, file_path):
+def get_file_content(gl: gitlab.Gitlab, project_id, ref, file_path):
     """
     Get the content of a file in the GitLab repository.
     """
-    gl = gitlab.Gitlab(url = settings.gitlab_url, oauth_token = oauth_token)
-    gl.auth()
     project = gl.projects.get(project_id)
     file = project.files.get(file_path = file_path, ref = ref)
     content_bytes = file.decode()
     return content_bytes.decode('utf-8') if isinstance(content_bytes, bytes) else content_bytes
 
-def get_project_commits(oauth_token, project_id, ref_name=None, per_page=20):
+def get_project_commits(gl: gitlab.Gitlab, project_id, ref_name=None, per_page=20):
     """
     获取 GitLab 项目的提交列表。
     """
-    gl = gitlab.Gitlab(url=settings.gitlab_url, oauth_token=oauth_token)
-    gl.auth()
     project = gl.projects.get(project_id)
     # 'ref_name' 可以是分支名、标签名或 commit SHA
     # 使用 per_page 限制返回的提交数量，例如最近的 20 个
@@ -61,12 +50,10 @@ def get_project_commits(oauth_token, project_id, ref_name=None, per_page=20):
         for c in commits
     ]
 
-def get_commit_details(oauth_token, project_id, commit_sha):
+def get_commit_details(gl: gitlab.Gitlab, project_id, commit_sha):
     """
     Get the details of a specific commit in the GitLab repository.
     """
-    gl = gitlab.Gitlab(url = settings.gitlab_url, oauth_token = oauth_token)
-    gl.auth()
     project = gl.projects.get(project_id)
     commit = project.commits.get(commit_sha)
     return {
@@ -78,12 +65,10 @@ def get_commit_details(oauth_token, project_id, commit_sha):
         "stats": commit.stats
     }
 
-def get_branch(oauth_token, project_id, branch_name):
+def get_branch(gl: gitlab.Gitlab, project_id, branch_name):
     """
     Get the details of a specific branch in the GitLab repository.
     """
-    gl = gitlab.Gitlab(url = settings.gitlab_url, oauth_token = oauth_token)
-    gl.auth()
     project = gl.projects.get(project_id)
     branch = project.branches.get(branch_name)
     return {
