@@ -1,3 +1,4 @@
+from threading import Thread
 from . import auth
 from ..model.repositories import Repository
 from ..model.tokens import Token
@@ -52,17 +53,8 @@ def bind_repo(token: Token, repo_name: str):
         # TODO # analysis.create_analysis(repo_id)
     bind_repo_with_user(repo.id, token.user.id)
 
-    # 创建分析线程并定义回调。等待AI组提供RepoAnalizer
-    '''        
-    analizer = get_repo_analyzer(repo_id)   # 在core.analysis中定义这个工厂函数，用于创建RepoAnalizer对象
-    @analizer.ondone
-    def callback(result: str):
-        sql_repo_analysis_setter.set(repo_id, result)
-    @analizer.onfail
-    def callback_fail(result: str):
-        sql_repo_analysis_setter.set_failed(repo_id)
-    Thread(target=analizer.analyze).start()
-    '''
+    # 进行分析
+    analysis.analyze(token, repo_id, branch)
 
 
 def unbind_repo(user_id: int, repo_id: int):

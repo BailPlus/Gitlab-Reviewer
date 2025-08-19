@@ -1,6 +1,7 @@
 from sqlmodel import select, desc
 from ..model.repositories import Repository
 from ..model.repository_analyses import RepositoryAnalysis, AnalysisStatus
+from ..model.repository_metrics import RepositoryMetric
 from . import get_session
 from ..errors.analysis import *
 
@@ -65,4 +66,24 @@ def fail_analysis(repo_id: int):
         assert (analysis := session.get(RepositoryAnalysis,repo.analysis_id)) is not None
         analysis.status = AnalysisStatus.FAILED
         session.add(analysis)
+        session.commit()
+
+
+def get_score(repo_id: int) -> float:
+    with get_session() as session:
+        assert (repo := session.get(Repository, repo_id)) is not None
+        return (session.exec(
+            select(RepositoryMetric)
+            .filter_by(repo_id=repo_id)
+        )
+        .one()
+        .quality_score)
+
+
+def save_score(repo_id: int, score: float):
+    with get_session() as session:
+        assert (repo := session.get(Repository, repo_id)) is not None
+        session.add(
+            RepositoryMetric(repo_id=repo_id, quality_score=score)
+        )
         session.commit()
