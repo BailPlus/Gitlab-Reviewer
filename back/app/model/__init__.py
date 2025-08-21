@@ -7,7 +7,8 @@ class TimestampMixin:
     def created_at(cls):
         return Column(
             DateTime(timezone=True),
-            server_default=func.now()
+            server_default=func.now(),
+            nullable=False
         )
     
     @declared_attr
@@ -15,5 +16,6 @@ class TimestampMixin:
         return Column(
             DateTime(timezone=True),
             server_default=func.now(),
-            onupdate=func.now()
+            onupdate=func.now(),
+            nullable=False
         )

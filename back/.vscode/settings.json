@@ -4,7 +4,9 @@
     ".python-version": true,
     "pyproject.toml": true,
     "uv.lock": true,
-    ".venv": true
+    ".venv": true,
+    "requirements.txt": true,
+    ".vscode": true
   },
   "explorer.excludeGitIgnore": false
 }
