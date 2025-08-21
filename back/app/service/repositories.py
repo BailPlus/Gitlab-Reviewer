@@ -1,4 +1,3 @@
-from threading import Thread
 from . import auth
 from ..model.repositories import Repository
 from ..model.tokens import Token
@@ -54,7 +53,7 @@ def bind_repo(token: Token, repo_name: str):
     bind_repo_with_user(repo.id, token.user.id)
 
     # 进行分析
-    analysis.analyze(token, repo_id, branch)
+    analysis.analyze(token, repo_id)
 
 
 def unbind_repo(user_id: int, repo_id: int):

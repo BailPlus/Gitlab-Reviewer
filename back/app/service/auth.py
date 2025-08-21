@@ -7,6 +7,7 @@ from ..schema.auth import GitlabToken
 from ..model.tokens import Token
 from ..errors.auth import InvalidGitlabToken
 from ..db import auth as db
+from . import repositories
 import time, gitlab.exceptions
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     'login',
     'logout',
     'get_token_from_cookie',
+    'check_repo_permission'
 ]
 
 
@@ -45,8 +47,8 @@ def verify_gitlab_token(token: str) -> Gitlab:
     gl._set_auth_info()
     try:
         gl.auth()
-    except gitlab.exceptions.GitlabAuthenticationError:
-        raise InvalidGitlabToken()
+    except gitlab.exceptions.GitlabAuthenticationError as e:
+        raise InvalidGitlabToken from e
     return gl
 
 
@@ -91,3 +93,13 @@ def get_token_from_cookie(request: Request) -> Token:
         delete_token_from_db(token)
         raise InvalidGitlabToken(info='登录已过期')
     return token
+
+
+def check_repo_permission(user_id: int, repo_id: int):
+    """验证用户是否绑定analysis对应的仓库"""
+    # XXX: 建议进行压测，在用户绑定的仓库数量很多时
+    for repo in repositories.get_user_binded_repos(user_id):
+        if repo.id == repo_id:
+            break
+    else:
+        raise PermissionDenied

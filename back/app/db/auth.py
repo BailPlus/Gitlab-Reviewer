@@ -1,6 +1,5 @@
 from ..model.users import User
 from ..model.tokens import Token
-
 from ..errors.auth import *
 from . import get_session
 

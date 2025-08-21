@@ -19,3 +19,8 @@ class PermissionDenied(AuthException):
     code = 403
     status = 103
     info = "权限不足"
+
+class InvalidGitlabWebhookToken(AuthException):
+    code = 401
+    status = 104
+    info = "无效的gitlab webhook token"

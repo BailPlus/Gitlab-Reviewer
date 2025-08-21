@@ -1,5 +1,4 @@
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import Column, Integer, ForeignKey
 from . import TimestampMixin
 from .users import User
 import time
