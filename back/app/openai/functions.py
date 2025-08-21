@@ -2,28 +2,34 @@ import gitlab
 
 def get_repo_info(gl: gitlab.Gitlab, project_id):
     """
-    Get the GitLab repository info by project ID.
+    根据项目 ID 获取 GitLab 仓库的基本信息。
     """
     project = gl.projects.get(project_id)
     return project.attributes
 
 def get_repo_branches(gl: gitlab.Gitlab, project_id):
     """
-    Get the branches of a GitLab repository by project ID.
+    根据项目 ID 获取 GitLab 仓库的分支列表。
     """
     project = gl.projects.get(project_id)
     return [branch.name for branch in project.branches.list(get_all=True)]
 
 def get_repo_tree(gl: gitlab.Gitlab, project_id, ref=None):
     """
-    Get the GitLab repository info by project ID.
+    根据项目 ID 获取 GitLab 仓库的文件树结构。
+    可通过 ref 指定分支、标签或提交（默认为仓库默认分支）。
     """
     project = gl.projects.get(project_id)
     return project.repository_tree(ref=ref, recursive=True, get_all=True) # type: ignore
 
 def get_file_content(gl: gitlab.Gitlab, project_id, ref, file_path):
     """
-    Get the content of a file in the GitLab repository.
+    获取 GitLab 仓库中指定文件的内容。
+    参数:
+      - project_id: 项目 ID
+      - ref: 文件所在的分支、标签或提交 SHA
+      - file_path: 仓库中文件的完整路径
+    返回 UTF-8 解码后的文件内容字符串。
     """
     project = gl.projects.get(project_id)
     file = project.files.get(file_path = file_path, ref = ref)
@@ -33,6 +39,11 @@ def get_file_content(gl: gitlab.Gitlab, project_id, ref, file_path):
 def get_project_commits(gl: gitlab.Gitlab, project_id, ref_name=None, per_page=20):
     """
     获取 GitLab 项目的提交列表。
+    参数:
+      - project_id: 项目 ID
+      - ref_name: 可为分支名、标签名或 commit SHA（可选）
+      - per_page: 每页返回的提交数量（默认 20）
+    返回提交的摘要信息列表。
     """
     project = gl.projects.get(project_id)
     # 'ref_name' 可以是分支名、标签名或 commit SHA
@@ -52,7 +63,11 @@ def get_project_commits(gl: gitlab.Gitlab, project_id, ref_name=None, per_page=2
 
 def get_commit_details(gl: gitlab.Gitlab, project_id, commit_sha):
     """
-    Get the details of a specific commit in the GitLab repository.
+    获取指定提交的详细信息。
+    参数:
+      - project_id: 项目 ID
+      - commit_sha: 提交的 SHA 值
+    返回包含提交详细信息的字典。
     """
     project = gl.projects.get(project_id)
     commit = project.commits.get(commit_sha)
@@ -65,9 +80,24 @@ def get_commit_details(gl: gitlab.Gitlab, project_id, commit_sha):
         "stats": commit.stats
     }
 
+def get_commit_compare(gl: gitlab.Gitlab, project_id, before_sha, after_sha):
+    """
+    获取指定提交的差异信息。
+    参数:
+      - project_id: 项目 ID
+      - before_sha: 提交的 SHA 值
+      - after_sha: 提交的 SHA 值
+    """
+    project = gl.projects.get(project_id)
+    return project.repository_compare(before_sha, after_sha)
+
 def get_branch(gl: gitlab.Gitlab, project_id, branch_name):
     """
-    Get the details of a specific branch in the GitLab repository.
+    获取指定分支的详细信息，包括最新提交信息。
+    参数:
+      - project_id: 项目 ID
+      - branch_name: 分支名称
+    返回包含分支和最新提交信息的字典。
     """
     project = gl.projects.get(project_id)
     branch = project.branches.get(branch_name)
@@ -89,6 +119,7 @@ function_map = {
     "get_file_content": get_file_content,
     "get_project_commits": get_project_commits,
     "get_commit_details": get_commit_details,
+    "get_commit_compare": get_commit_compare,
     "get_branch": get_branch,
 }
 
@@ -217,6 +248,31 @@ tools = [
                     },
                 },
                 "required": ["project_id", "commit_sha"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_commit_compare",
+            "description": "获取两个提交之间的差异信息，你可以通过这个直接获取一次push的diff。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "project_id": {
+                        "type": "integer",
+                        "description": "GitLab项目的ID。",
+                    },
+                    "before_sha": {
+                        "type": "string",
+                        "description": "比较的起始提交SHA值。",
+                    },
+                    "after_sha": {
+                        "type": "string",
+                        "description": "比较的结束提交SHA值。",
+                    },
+                },
+                "required": ["project_id", "before_sha", "after_sha"],
             },
         },
     },
