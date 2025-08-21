@@ -25,6 +25,7 @@ export default function Home() {
   const [branches, setBranches] = useState([]);
   const [mergeRequests, setMergeRequests] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [typedText, setTypedText] = useState("");
   const fullTitle = "Gitlab-Reviewer";
 
@@ -183,6 +184,42 @@ export default function Home() {
     }
   };
 
+  // 注销功能
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/_/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // 清除本地状态和 cookie
+      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      setUser(null);
+      setProjects([]);
+      setSelectedProject(null);
+      setProjectDetails(null);
+      setCommits([]);
+      setBranches([]);
+      setMergeRequests([]);
+      setShowSettings(false);
+      
+      // 重新加载页面以确保完全清理
+      window.location.reload();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // 即使请求失败也清除本地状态
+      document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      window.location.reload();
+    }
+  };
+
+  // 切换设置弹窗
+  const toggleSettings = () => {
+    setShowSettings(!showSettings);
+  };
+
   return (
     <div className={styles.containerWrapper}>
       {!loading && !user && (
@@ -278,9 +315,12 @@ export default function Home() {
                 className={`${styles.skeleton} ${styles.skeletonSettings}`}
               ></div>
             ) : (
-              <a href="/" target="_blank" rel="noopener noreferrer">
+              <button 
+                className={styles.settingsButton}
+                onClick={toggleSettings}
+              >
                 <span>设置</span>
-              </a>
+              </button>
             )}
           </div>
         </aside>
@@ -408,6 +448,65 @@ export default function Home() {
           </div>
         </main>
       </div>
+
+      {/* 设置弹窗 */}
+      {showSettings && (
+        <div className={styles.settingsOverlay} onClick={toggleSettings}>
+          <div 
+            className={styles.settingsModal} 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.settingsHeader}>
+              <h2>设置</h2>
+              <button 
+                className={styles.closeButton}
+                onClick={toggleSettings}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className={styles.settingsContent}>
+              <div className={styles.settingsSection}>
+                <h3>账户</h3>
+                <div className={styles.userInfoSection}>
+                  <div className={styles.userProfile}>
+                    <Image
+                      src={user?.avatar_url || "/default-avatar.png"}
+                      alt={user?.name || "User"}
+                      width={48}
+                      height={48}
+                      className={styles.settingsAvatar}
+                    />
+                    <div className={styles.userDetails}>
+                      <div className={styles.settingsUserName}>{user?.name}</div>
+                      <div className={styles.settingsUserEmail}>{user?.email}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.settingsSection}>
+                <h3>操作</h3>
+                <button 
+                  className={styles.logoutButton}
+                  onClick={handleLogout}
+                >
+                  <span>注销登录</span>
+                </button>
+              </div>
+
+              <div className={styles.settingsSection}>
+                <h3>关于</h3>
+                <div className={styles.aboutInfo}>
+                  <p>Gitlab Reviewer v1.0.0</p>
+                  <p>智能代码审查工具</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

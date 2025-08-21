@@ -644,3 +644,190 @@
   font-size: 0.9rem;
   line-height: 1.4;
 }
+
+/* 设置按钮样式 */
+.settingsButton {
+  color: rgb(var(--foreground-rgb));
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.settingsButton:hover {
+  background-color: rgba(var(--foreground-rgb), 0.05);
+  color: rgb(var(--foreground-rgb));
+}
+
+/* 设置弹窗样式 */
+.settingsOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.settingsModal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  max-width: 480px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.settingsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgb(var(--border-rgb));
+}
+
+.settingsHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: rgb(var(--text-secondary-rgb));
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(var(--foreground-rgb), 0.1);
+}
+
+.settingsContent {
+  padding: 0 24px 24px 24px;
+}
+
+.settingsSection {
+  margin-bottom: 24px;
+}
+
+.settingsSection h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+}
+
+/* 用户信息区域 */
+.userInfoSection {
+  padding: 16px;
+  background: rgb(var(--sidebar-rgb));
+  border-radius: 8px;
+  border: 1px solid rgb(var(--border-rgb));
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingsAvatar {
+  border-radius: 50%;
+}
+
+.userDetails {
+  flex: 1;
+}
+
+.settingsUserName {
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+  margin-bottom: 4px;
+}
+
+.settingsUserEmail {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+}
+
+/* 注销按钮 */
+.logoutButton {
+  width: 100%;
+  padding: 12px 16px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.logoutButton:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.logoutButton:active {
+  transform: translateY(0);
+}
+
+/* 关于信息 */
+.aboutInfo {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.aboutInfo p {
+  margin: 0 0 4px 0;
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .settingsModal {
+    background: rgb(var(--sidebar-rgb));
+    border: 1px solid rgb(var(--border-rgb));
+  }
+}
