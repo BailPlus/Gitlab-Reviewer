@@ -98,14 +98,7 @@ export default function Home() {
   }, [loading, user]);
 
     const handleLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
-    const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
-    const gitlabBaseUrl = process.env.NEXT_PUBLIC_GITLAB_BASE_URL;
-    const scope = process.env.NEXT_PUBLIC_GITLAB_SCOPE;
-
-    const authorizeUrl = `${gitlabBaseUrl}/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
-
-    window.location.href = authorizeUrl;
+    window.location.href = '/_/auth/login';
   };
 
   // 获取项目详细信息
