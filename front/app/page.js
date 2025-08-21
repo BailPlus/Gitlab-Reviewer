@@ -19,6 +19,12 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectDetails, setProjectDetails] = useState(null);
+  const [commits, setCommits] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [mergeRequests, setMergeRequests] = useState([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
   const [typedText, setTypedText] = useState("");
   const fullTitle = "Gitlab-Reviewer";
 
@@ -90,14 +96,91 @@ export default function Home() {
     }
   }, [loading, user]);
 
-  const handleLogin = () => {
-    const authorizeUrl =
-      `${process.env.NEXT_PUBLIC_GITLAB_BASE_URL}/oauth/authorize` +
-      `?client_id=${process.env.NEXT_PUBLIC_CLIENT_ID}` +
-      `&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}` +
-      `&response_type=code` +
-      `&scope=${process.env.NEXT_PUBLIC_GITLAB_SCOPE}`;
+    const handleLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
+    const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
+    const gitlabBaseUrl = process.env.NEXT_PUBLIC_GITLAB_BASE_URL;
+    const scope = process.env.NEXT_PUBLIC_GITLAB_SCOPE;
+
+    const authorizeUrl = `${gitlabBaseUrl}/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+
     window.location.href = authorizeUrl;
+  };
+
+  // 获取项目详细信息
+  const fetchProjectDetails = async (project) => {
+    const token = getCookie("token");
+    if (!token) return;
+
+    setLoadingDetails(true);
+    setSelectedProject(project);
+
+    try {
+      // 获取项目详情
+      const projectResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_GITLAB_BASE_URL}/api/v4/projects/${project.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (projectResponse.ok) {
+        const projectData = await projectResponse.json();
+        setProjectDetails(projectData);
+      }
+
+      // 获取提交记录
+      const commitsResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_GITLAB_BASE_URL}/api/v4/projects/${project.id}/repository/commits?per_page=20`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (commitsResponse.ok) {
+        const commitsData = await commitsResponse.json();
+        setCommits(commitsData);
+      }
+
+      // 获取分支信息
+      const branchesResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_GITLAB_BASE_URL}/api/v4/projects/${project.id}/repository/branches?per_page=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (branchesResponse.ok) {
+        const branchesData = await branchesResponse.json();
+        setBranches(branchesData);
+      }
+
+      // 获取合并请求
+      const mrResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_GITLAB_BASE_URL}/api/v4/projects/${project.id}/merge_requests?state=all&per_page=10`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (mrResponse.ok) {
+        const mrData = await mrResponse.json();
+        setMergeRequests(mrData);
+      }
+
+    } catch (error) {
+      console.error("Failed to fetch project details:", error);
+    } finally {
+      setLoadingDetails(false);
+    }
   };
 
   return (
@@ -175,7 +258,13 @@ export default function Home() {
                   </>
                 ) : (
                   projects.map((project) => (
-                    <li key={project.id} className={styles.repoItem}>
+                    <li 
+                      key={project.id} 
+                      className={`${styles.repoItem} ${
+                        selectedProject?.id === project.id ? styles.repoItemSelected : ""
+                      }`}
+                      onClick={() => fetchProjectDetails(project)}
+                    >
                       {project.name}
                     </li>
                   ))
@@ -197,9 +286,125 @@ export default function Home() {
         </aside>
         <main className={styles.main}>
           <div className={styles.mainContent}>
-            <div className={styles.placeholder}>
-              <h1>选择一个仓库进行分析</h1>
-            </div>
+            {!selectedProject ? (
+              <div className={styles.placeholder}>
+                <h1>选择一个仓库进行分析</h1>
+              </div>
+            ) : loadingDetails ? (
+              <div className={styles.loading}>
+                <p>加载项目信息中...</p>
+              </div>
+            ) : (
+              <div className={styles.projectDetailsContainer}>
+                {/* 项目基本信息 */}
+                {projectDetails && (
+                  <section className={styles.projectInfo}>
+                    <div className={styles.projectHeader}>
+                      <h1 className={styles.projectName}>{projectDetails.name}</h1>
+                      <div className={styles.projectMeta}>
+                        <span className={styles.projectId}>ID: {projectDetails.id}</span>
+                        <span className={styles.projectVisibility}>{projectDetails.visibility}</span>
+                        <span className={styles.projectLanguage}>{projectDetails.default_branch}</span>
+                      </div>
+                    </div>
+                    {projectDetails.description && (
+                      <p className={styles.projectDescription}>{projectDetails.description}</p>
+                    )}
+                    <div className={styles.projectStats}>
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>Stars</span>
+                        <span className={styles.statValue}>{projectDetails.star_count}</span>
+                      </div>
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>Forks</span>
+                        <span className={styles.statValue}>{projectDetails.forks_count}</span>
+                      </div>
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>Issues</span>
+                        <span className={styles.statValue}>{projectDetails.open_issues_count}</span>
+                      </div>
+                      <div className={styles.stat}>
+                        <span className={styles.statLabel}>Created</span>
+                        <span className={styles.statValue}>
+                          {new Date(projectDetails.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {/* 分支信息 */}
+                <section className={styles.branchesSection}>
+                  <h2 className={styles.sectionTitle}>分支信息</h2>
+                  <div className={styles.branchesList}>
+                    {branches.map((branch) => (
+                      <div key={branch.name} className={styles.branchItem}>
+                        <span className={styles.branchName}>{branch.name}</span>
+                        {branch.protected && <span className={styles.branchProtected}>Protected</span>}
+                        {branch.default && <span className={styles.branchDefault}>Default</span>}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* 最近提交 */}
+                <section className={styles.commitsSection}>
+                  <h2 className={styles.sectionTitle}>最近提交</h2>
+                  <div className={styles.commitsList}>
+                    {commits.map((commit) => (
+                      <div key={commit.id} className={styles.commitItem}>
+                        <div className={styles.commitHeader}>
+                          <span className={styles.commitMessage}>{commit.title}</span>
+                          <span className={styles.commitId}>{commit.short_id}</span>
+                        </div>
+                        <div className={styles.commitMeta}>
+                          <span className={styles.commitAuthor}>{commit.author_name}</span>
+                          <span className={styles.commitDate}>
+                            {new Date(commit.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        {commit.message !== commit.title && (
+                          <p className={styles.commitDescription}>{commit.message}</p>
+                        )}
+                        <div className={styles.commitStats}>
+                          <span>+{commit.stats?.additions || 0}</span>
+                          <span>-{commit.stats?.deletions || 0}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* 合并请求 */}
+                <section className={styles.mergeRequestsSection}>
+                  <h2 className={styles.sectionTitle}>合并请求</h2>
+                  <div className={styles.mergeRequestsList}>
+                    {mergeRequests.map((mr) => (
+                      <div key={mr.id} className={styles.mergeRequestItem}>
+                        <div className={styles.mrHeader}>
+                          <span className={styles.mrTitle}>{mr.title}</span>
+                          <span className={`${styles.mrState} ${styles[`mrState${mr.state}`]}`}>
+                            {mr.state}
+                          </span>
+                        </div>
+                        <div className={styles.mrMeta}>
+                          <span className={styles.mrAuthor}>{mr.author.name}</span>
+                          <span className={styles.mrBranch}>
+                            {mr.source_branch} → {mr.target_branch}
+                          </span>
+                          <span className={styles.mrDate}>
+                            {new Date(mr.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {mr.description && (
+                          <p className={styles.mrDescription}>{mr.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
+            )}
           </div>
         </main>
       </div>

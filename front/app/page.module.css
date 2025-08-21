@@ -1,35 +1,4 @@
-/* Reset and base styles */
-:root {
-  --background-rgb: 255, 255, 255;
-  --foreground-rgb: 17, 24, 39;
-  --sidebar-rgb: 249, 250, 251;
-  --border-rgb: 229, 231, 235;
-  --text-secondary-rgb: 107, 114, 128;
-  --accent-rgb: 79, 70, 229;
-  --accent-hover-rgb: 67, 56, 202;
-  --gitlab-orange: #fc6d26;
-  --gitlab-orange-hover: #e24329;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-rgb: 17, 24, 39;
-    --foreground-rgb: 255, 255, 255;
-    --sidebar-rgb: 31, 41, 55;
-    --border-rgb: 55, 65, 81;
-    --text-secondary-rgb: 156, 163, 175;
-    --accent-rgb: 99, 102, 241;
-    --accent-hover-rgb: 129, 140, 248;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
-  margin: 0;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
+/* Component-specific styles for page.js */
 .containerWrapper {
   position: relative;
   width: 100%;
@@ -48,6 +17,7 @@ body {
   align-items: center;
   z-index: 10;
   flex-direction: column;
+  background-color: #ffffff; /* 完全不透明的白色背景 */
 }
 
 .loginContent {
@@ -91,12 +61,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at center,
-    rgba(var(--background-rgb), 0.1) 0%,
-    rgba(var(--background-rgb), 0.8) 60%,
-    rgb(var(--background-rgb)) 80%
-  );
+  background: #ffffff; /* 完全不透明的白色背景，替代原来的透明渐变 */
   z-index: -1;
 }
 
@@ -237,6 +202,15 @@ body {
   color: rgb(var(--foreground-rgb));
 }
 
+.repoItemSelected {
+  background-color: rgb(var(--accent-rgb));
+  color: white;
+}
+
+.repoItemSelected:hover {
+  background-color: rgb(var(--accent-hover-rgb));
+}
+
 .settings {
   padding: 8px;
 }
@@ -304,19 +278,24 @@ body {
 .main {
   flex-grow: 1;
   display: flex;
-  justify-content: center;
-  padding: 48px;
+  justify-content: flex-start;
+  padding: 0;
+  background: rgb(var(--background-rgb));
+  overflow-y: auto;
 }
 
 .mainContent {
   width: 100%;
-  max-width: 768px;
-  text-align: center;
+  min-height: 100vh;
 }
 
 .placeholder {
-  margin-top: 30vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
   color: rgb(var(--text-secondary-rgb));
+  text-align: center;
 }
 
 .placeholder h1 {
@@ -377,4 +356,291 @@ body {
 .welcomeMessage {
   text-align: center;
   margin-top: 20vh;
+}
+
+/* 项目详情样式 */
+.projectDetailsContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.projectInfo {
+  background: white;
+  border: 1px solid rgb(var(--border-rgb));
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.projectHeader {
+  margin-bottom: 16px;
+}
+
+.projectName {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: rgb(var(--foreground-rgb));
+}
+
+.projectMeta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.projectId,
+.projectVisibility,
+.projectLanguage {
+  background: rgb(var(--sidebar-rgb));
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.projectDescription {
+  margin: 16px 0;
+  color: rgb(var(--text-secondary-rgb));
+  line-height: 1.5;
+}
+
+.projectStats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.statValue {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+}
+
+/* 分支信息样式 */
+.branchesSection,
+.commitsSection,
+.mergeRequestsSection {
+  background: white;
+  border: 1px solid rgb(var(--border-rgb));
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: rgb(var(--foreground-rgb));
+}
+
+.branchesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.branchItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgb(var(--sidebar-rgb));
+  border-radius: 6px;
+  border: 1px solid rgb(var(--border-rgb));
+}
+
+.branchName {
+  font-weight: 500;
+  color: rgb(var(--foreground-rgb));
+}
+
+.branchProtected {
+  background: #dc2626;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+}
+
+.branchDefault {
+  background: #059669;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+}
+
+/* 提交记录样式 */
+.commitsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.commitItem {
+  padding: 16px;
+  border: 1px solid rgb(var(--border-rgb));
+  border-radius: 8px;
+  background: rgb(var(--sidebar-rgb));
+}
+
+.commitHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.commitMessage {
+  font-weight: 500;
+  color: rgb(var(--foreground-rgb));
+  flex: 1;
+}
+
+.commitId {
+  background: rgb(var(--border-rgb));
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.commitMeta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.commitAuthor {
+  font-weight: 500;
+  color: rgb(var(--accent-rgb));
+}
+
+.commitDate {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+}
+
+.commitDescription {
+  margin: 8px 0;
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.commitStats {
+  display: flex;
+  gap: 8px;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.commitStats span:first-child {
+  color: #059669;
+}
+
+.commitStats span:last-child {
+  color: #dc2626;
+}
+
+/* 合并请求样式 */
+.mergeRequestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mergeRequestItem {
+  padding: 16px;
+  border: 1px solid rgb(var(--border-rgb));
+  border-radius: 8px;
+  background: rgb(var(--sidebar-rgb));
+}
+
+.mrHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.mrTitle {
+  font-weight: 500;
+  color: rgb(var(--foreground-rgb));
+  flex: 1;
+}
+
+.mrState {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.mrStateopened {
+  background: #059669;
+  color: white;
+}
+
+.mrStateclosed {
+  background: #dc2626;
+  color: white;
+}
+
+.mrStatemerged {
+  background: #7c3aed;
+  color: white;
+}
+
+.mrMeta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mrAuthor {
+  font-weight: 500;
+  color: rgb(var(--accent-rgb));
+}
+
+.mrBranch {
+  font-family: monospace;
+  background: rgb(var(--border-rgb));
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.mrDate {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+}
+
+.mrDescription {
+  margin: 8px 0;
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
