@@ -8,4 +8,4 @@ class GetRepositoriesOutput(BaseModel):
 
 class AddRepositoryInput(BaseModel):
     """绑定新仓库输入"""
-    repo_name: str
+    repo_id: int

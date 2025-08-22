@@ -7,7 +7,7 @@ from ..schema import repositories as repo_models
 router = APIRouter(prefix='/api/repositories')
 
 
-@router.get('/',
+@router.get('',
             response_model=BaseOutput[list[
                 repo_models.GetRepositoriesOutput
             ]])
@@ -20,14 +20,14 @@ async def get_repositories(request: Request):
     ) for repo in repos])
 
 
-@router.post('/', response_model=EmptyOutput)
+@router.post('', response_model=EmptyOutput)
 async def add_repository(
     request: Request,
     input_schema: repo_models.AddRepositoryInput,
 ):
     """绑定新仓库"""
     token = get_token_from_cookie(request)
-    bind_repo(token, input_schema.repo_name)
+    bind_repo(token, input_schema.repo_id)
     return EmptyOutput()
 
 

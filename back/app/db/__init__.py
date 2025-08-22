@@ -8,7 +8,10 @@ from ..model.repository_bindings import RepositoryBinding
 from ..model.repository_analyses import RepositoryAnalysis
 from ..model.repository_metrics import RepositoryMetric
 
-engine = create_engine(settings.database_url)
+engine = create_engine(
+    settings.database_url,
+    pool_pre_ping=True
+)
 SQLModel.metadata.create_all(engine)
 
 

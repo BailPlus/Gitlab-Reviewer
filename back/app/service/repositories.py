@@ -1,4 +1,4 @@
-from . import auth
+from . import auth, analysis
 from ..model.repositories import Repository
 from ..model.tokens import Token
 from ..service import analysis
@@ -30,11 +30,11 @@ def bind_repo_with_user(repo_id: int, user_id: int):
     db.bind_repo_with_user(repo_id, user_id)
 
 
-def bind_repo(token: Token, repo_name: str):
-    # 获取仓库id
+def bind_repo(token: Token, repo_id: int):
+    # 验证仓库存在且有访问权限
     gl = auth.verify_gitlab_token(token.token)
     try:
-        repo_id = gl.projects.get(repo_name).id
+        gl.projects.get(repo_id)
     except gitlab.exceptions.GitlabGetError as e:
         raise RepoNotExist from e
 
@@ -49,7 +49,6 @@ def bind_repo(token: Token, repo_name: str):
     except RepoNotExist:
         repo = Repository(id=repo_id)
         add_repo_into_db(repo)
-        # TODO # analysis.create_analysis(repo_id)
     bind_repo_with_user(repo.id, token.user.id)
 
     # 进行分析

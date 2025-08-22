@@ -98,7 +98,7 @@
   Cookie: token=...
   
   {
-    "repo_name": "user1/repo1"
+    "repo_id": 1
   }
   ```
   ```json

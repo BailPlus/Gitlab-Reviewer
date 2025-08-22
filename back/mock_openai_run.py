@@ -24,7 +24,10 @@ openai.generate_commit_review = mock_openai_generate_commit_review
 #         return HTMLResponse('<meta http-equiv="refresh" content="1; url=/_/auth/login">即将登录')
 #     else:
 #         return HTMLResponse('<meta http-equiv="refresh" content="1; url=/docs">即将到/docs')
-
+@app.middleware('http')
+async def show_pkg(request, call_next):
+    print(request.headers)
+    return await call_next(request)
 
 if __name__ == "__main__":
     uvicorn.run("app:app", host="localhost", port=8000, reload=True)
