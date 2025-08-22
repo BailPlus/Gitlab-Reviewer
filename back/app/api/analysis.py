@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request
 from ..schema import BaseOutput, EmptyOutput, analysis as analysis_models
-from ..service.auth import get_token_from_cookie
+from ..service.auth import get_token_from_cookie, check_repo_permission
 from ..service.analysis import *
 
 router = APIRouter(prefix='/api/analysis')
@@ -13,7 +13,7 @@ async def post_analysis(
 ):
     token = get_token_from_cookie(request)
     repo_id = input_schema.repo_id
-    analyze(token, repo_id, branch)
+    analyze(token, repo_id)
     return EmptyOutput()
 
 

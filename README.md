@@ -8,7 +8,7 @@
 
 - 借鉴 codex 和 deepwiki
 - 可以绑定仓库，绑定之后可以由 AI 对项目进行在整体分析
-- 对每次 git 提交评估，给出修改建议，可以一键发起 PR
+- 对每次 git 推送进行评估，给出修改建议，可以一键发起 PR
 
 ### 基本功能
 
@@ -50,6 +50,7 @@
   - 用户登出
   ```http
   POST /_/auth/logout
+  Cookie: token=...
   ```
   ```http
   Set-Cookie: token=; expires=Thu, 01 Jan 1970 00:00:00 GMT
@@ -60,6 +61,7 @@
   - 获取用户信息
   ```http
   GET /_/auth/profile
+  Cookie: token=...
   ```
   ```json
   {
@@ -76,6 +78,7 @@
   - 获取用户绑定的仓库列表
   ```http
   GET /api/repositories
+  Cookie: token=...
   ```
   ```json
   {
@@ -92,6 +95,7 @@
   - 绑定新仓库
   ```http
   POST /api/repositories
+  Cookie: token=...
   
   {
     "repo_name": "user1/repo1"
@@ -107,6 +111,7 @@
   - 解绑仓库
   ```http
   DELETE /api/repositories/{repo_id}
+  Cookie: token=...
   ```
   ```json
   {
@@ -119,6 +124,7 @@
   - 对仓库进行宏观分析（异步请求）
   ```http
   POST /api/analysis
+  Cookie: token=...
 
   {
     "repo_id": 1
@@ -134,6 +140,7 @@
   - 获取仓库分析结果以及仓库代码质量指标
   ```http
   GET /api/analysis/{analysis_id}
+  Cookie: token=...
   ```
   ```json
   {
@@ -149,6 +156,7 @@
   - 获取分析结果历史
   ```http
   GET /api/analysis/history?repo_id=1' UNION SELECT flag FROM flag; -- -
+  Cookie: token=...
   ```
   ```json
   {
@@ -161,16 +169,95 @@
   ```
 
 - commit评审相关：
-  - POST /api/webhooks/gitlab - GitLab Webhook 接收端点
-  - GET /api/commits/{commit_id}/review - 获取提交的 AI 评审结果
-  - POST /api/commits/{commit_id}/review - 手动触发提交评审
+  - GitLab Webhook 接收端点
+  ```http
+  POST /api/webhooks/gitlab
+  X-Gitlab-Token: ...
+
+  {
+    "object_kind": "push",
+    "event_name": "push",
+    "before": "95790bf891e76fee5e1747ab589903a6a1f80f22",
+    "after": "da1560886d4f094c3e6c9ef40349f7d38b5d27d7",
+    "ref": "refs/heads/master",
+    "ref_protected": true,
+    "checkout_sha": "da1560886d4f094c3e6c9ef40349f7d38b5d27d7",
+    "message": "Hello World",
+    "user_id": 4,
+    "user_name": "John Smith",
+    "user_email": "john@example.com",
+    "user_avatar": "https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=8://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80",
+    "project_id": 15,
+    "project": {
+      "id": 15,
+      "name": "gitlab",
+      "description": "",
+      "web_url": "http://test.example.com/gitlab/gitlab",
+      "avatar_url": "https://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=8://s.gravatar.com/avatar/d4c74594d841139328695756648b6bd6?s=80",
+      "git_ssh_url": "git@test.example.com:gitlab/gitlab.git",
+      "git_http_url": "http://test.example.com/gitlab/gitlab.git",
+      "namespace": "gitlab",
+      "visibility_level": 0,
+      "path_with_namespace": "gitlab/gitlab",
+      "default_branch": "master"
+    },
+    "commits": [
+      {
+        "id": "c5feabde2d8cd023215af4d2ceeb7a64839fc428",
+        "message": "Add simple search to projects in public area\n\ncommit message body",
+        "title": "Add simple search to projects in public area",
+        "timestamp": "2013-05-13T18:18:08+00:00",
+        "url": "https://test.example.com/gitlab/gitlab/-/commit/c5feabde2d8cd023215af4d2ceeb7a64839fc428",
+        "author": {
+          "name": "Test User",
+          "email": "test@example.com"
+        }
+      }
+    ],
+    "total_commits_count": 1,
+    "push_options": {
+      "ci": {
+        "skip": true
+      }
+    }
+  }
+  ```
+  ```json
+  ???
+  ```
+  - 获取提交的 AI 评审结果
+  ```http
+  GET /api/commits/{commit_id}/review 
+  Cookie: token=...
+  ```
+  ```json
+  {
+    "status": 0,
+    "info": "ok",
+    "data": {
+      "review": "AI 评审结果",
+      "created_at": 17xxxxxxxx
+    }
+  }
+  ```
   - PUT /api/commits/{commit_id}/review - 更新评审状态
-  - POST /api/commits/{commit_id}/apply-suggestions - 一键应用修改建议
+  - 一键应用修改建议
+  ```http
+  POST /api/commits/{commit_id}/apply-suggestions
+  ```
+  ```json
+  {
+    "status": 0,
+    "info": "ok",
+    "data": {}
+  }
+  ```
 
 - 通知推送相关：
   - 获取通知设置
   ```http
   GET /api/notifications/settings
+  Cookie: token=...
   ```
   ```json
   {
@@ -192,6 +279,7 @@
   - 配置通知设置
   ```http
   POST /api/notifications/settings
+  Cookie: token=...
   
   {
     "notifications": {
@@ -228,6 +316,7 @@
   - 测试通知配置
   ```http
   POST /api/notifications/test
+  Cookie: token=...
   ```
   ```json
   {
@@ -240,7 +329,7 @@
 
 ## 后端
 
-- 技术栈：FastAPI, MariaDB
+- 技术栈：FastAPI, SQLModel
 
 ### 安装
 
@@ -259,7 +348,6 @@ pip install -r requirements.txt
 
 - uv
 ```shell
-uv sync
 uv run run.py
 ```
 
@@ -326,14 +414,25 @@ uv run run.py
 
 #### `commit_reviews` 表
 
-| 列名           | 类型                                    | 可否为空 | 键       | 默认值                | 额外                           |
+| 列名           | 类型                                    | 可否为空 | 键       | 默认值               | 额外                           |
 | ------------ | ------------------------------------- | ---- | ------- | ------------------ | ---------------------------- |
 | id           | BIGINT UNSIGNED                       | NO   | PRI     |                    | AUTO\_INCREMENT              |
-| commit\_id   | BIGINT UNSIGNED                       | NO   | UNI(FK) |                    |                              |
+| repo\_id       | BIGINT UNSIGNED                     | NO   | MUL(FK) |                    |
+| before\_commit | VARCHAR(64)                         | NO   | UNI |                    |                              |
+| after\_commit  | VARCHAR(64)                         | NO   | UNI |                    |                              |
 | review\_json | JSON                                  | NO   |         |                    |                              |
-| status       | ENUM('pending','completed','failed')           | NO   |         | pending            |                              |
+| status       | ENUM('pending','completed','failed')  | NO   |         | pending            |                              |
 | reviewed\_at | DATETIME                              | YES  |         |                    |                              |
 | updated\_at  | DATETIME                              | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
+
+#### `commit_review_bindings` 表
+
+| 列名          | 类型              | 可否为空 | 键       | 默认值 | 额外              |
+| ------------ | --------------- | ---- | ------- | --- | --------------- |
+| id           | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT |
+| commit\_id     | VARCHAR(64) | NO   | UNI      |                    |
+| review\_id    | BIGINT UNSIGNED | NO   | MUL(FK) |                    |
+| created\_at  | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                 |
 
 #### `suggestions` 表
 

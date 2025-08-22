@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     gitlab_oauth_redirect_url: str = ""
     gitlab_client_id: str = ""
     gitlab_client_secret: str = ""
+    gitlab_webhook_token: str = ""  # webhook防伪token
     openai_base_url: str = ""
     openai_api_key: str = ""
     openai_model: str = ""
