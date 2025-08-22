@@ -10,6 +10,7 @@ const Sidebar = ({
   projects, 
   selectedProject, 
   onProjectSelect, 
+  onAddRepository, // 新增：处理添加仓库的回调
   onSettingsClick,
   loading 
 }) => {
@@ -25,6 +26,17 @@ const Sidebar = ({
         <nav className={styles.repoNav}>
           <h2 className={styles.repoTitle}>仓库列表</h2>
           <ul className={styles.repoList}>
+            {/* 添加仓库按钮 */}
+            {!loading && user && (
+              <li 
+                className={`${styles.repoItem} ${styles.addRepoItem}`}
+                onClick={onAddRepository}
+              >
+                <span className={styles.addIcon}>+</span>
+                <span>添加仓库</span>
+              </li>
+            )}
+            
             {loading || !user ? (
               <SkeletonRepoList />
             ) : (

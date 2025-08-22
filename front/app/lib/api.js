@@ -123,6 +123,23 @@ export const backendService = {
     getProfile: () => backendApi('/_/auth/profile'),
   },
   
+  // 仓库管理相关
+  repositories: {
+    // 获取用户绑定的仓库列表
+    getBoundRepositories: () => backendApi('/api/repositories'),
+    
+    // 绑定新仓库 (使用repo_id)
+    bindRepository: (repoId) => backendApi('/api/repositories', {
+      method: 'POST',
+      body: JSON.stringify({ repo_id: repoId }),
+    }),
+    
+    // 解绑仓库
+    unbindRepository: (repoId) => backendApi(`/api/repositories/${repoId}`, {
+      method: 'DELETE',
+    }),
+  },
+  
   // 分析相关API (示例)
   analysis: {
     // 获取项目分析

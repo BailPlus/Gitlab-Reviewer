@@ -190,25 +190,46 @@
 }
 
 .repoItem {
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 12px 16px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box; /* 确保统一的盒模型 */
 }
 
 .repoItem:hover {
-  background-color: rgba(var(--foreground-rgb), 0.05);
-  color: rgb(var(--foreground-rgb));
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
 .repoItemSelected {
-  background-color: rgb(var(--accent-rgb));
-  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white !important;
+  font-weight: 600;
 }
 
-.repoItemSelected:hover {
-  background-color: rgb(var(--accent-hover-rgb));
+.addRepoItem {
+  color: #6b7280;
+  margin-bottom: 8px;
+  justify-content: center;
+  font-weight: 500; /* 与普通仓库项保持一致 */
+}
+
+.addRepoItem:hover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  color: #3b82f6;
+}
+
+.addIcon {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
 }
 
 .settings {
@@ -830,4 +851,377 @@
     background: rgb(var(--sidebar-rgb));
     border: 1px solid rgb(var(--border-rgb));
   }
+}
+
+/* 仓库绑定组件样式 - Codex风格 */
+.repositoryBindingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 60px 20px;
+}
+
+.bindingInputContainer {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+}
+
+.inputWrapper {
+  width: 100%;
+}
+
+.inputHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.inputHeader h2 {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+}
+
+.searchInputGroup {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.searchInputGroup:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 24px rgba(59, 130, 246, 0.15);
+}
+
+.repositorySearchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 18px 24px;
+  font-size: 16px;
+  background: transparent;
+  color: var(--foreground);
+}
+
+.repositorySearchInput::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.bindActionButton {
+  padding: 16px 28px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.bindActionButton:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.bindActionButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.repositoryDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 12px;
+}
+
+.dropdownSection {
+  padding: 12px 0;
+}
+
+.sectionHeader {
+  padding: 16px 24px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.repositoryOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.repositoryOption:hover {
+  background: #f8fafc;
+}
+
+.repositoryOption.selected {
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.repoInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.repoName {
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.repoMeta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.visibility {
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.repoStats {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.emptyState {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.errorMessage {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorMessage::before {
+  content: "⚠️";
+  font-size: 16px;
+}
+
+/* 保持旧版兼容样式 */
+.placeholder {
+  text-align: center;
+  color: var(--foreground);
+}
+
+.placeholder h1 {
+  margin-bottom: 16px;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.placeholder p {
+  margin-bottom: 32px;
+  font-size: 1.2rem;
+  color: #6b7280;
+}
+
+
+
+/* 仓库设置组件样式 */
+.repositorySettings {
+  position: relative;
+}
+
+.settingsIconButton {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.settingsIconButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.settingsDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  margin-top: 4px;
+}
+
+.settingsMenu {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+}
+
+.settingsMenuItem {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: #374151;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settingsMenuItem:hover {
+  background: #f3f4f6;
+}
+
+.projectTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.confirmOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirmModal {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.confirmHeader h3 {
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.confirmContent p {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.warning {
+  color: #dc2626 !important;
+  font-size: 0.9rem;
+  background: #fef2f2;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #dc2626;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.cancelButton {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #e5e7eb;
+}
+
+.confirmButton {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.confirmButton:hover {
+  background: #b91c1c;
+}
+
+.confirmButton:disabled,
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

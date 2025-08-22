@@ -1,16 +1,25 @@
 /**
  * 项目详情组件
  */
+import RepositorySettings from './RepositorySettings';
 import styles from "../page.module.css";
 
 // 项目基本信息组件
-const ProjectInfo = ({ project }) => {
+const ProjectInfo = ({ project, boundRepository, onRepositoryUnbound }) => {
   if (!project) return null;
 
   return (
     <section className={styles.projectInfo}>
       <div className={styles.projectHeader}>
-        <h1 className={styles.projectName}>{project.name}</h1>
+        <div className={styles.projectTitleRow}>
+          <h1 className={styles.projectName}>{project.name}</h1>
+          {boundRepository && (
+            <RepositorySettings 
+              repository={boundRepository}
+              onRepositoryUnbound={onRepositoryUnbound}
+            />
+          )}
+        </div>
         <div className={styles.projectMeta}>
           <span className={styles.projectId}>ID: {project.id}</span>
           <span className={styles.projectVisibility}>{project.visibility}</span>
@@ -128,10 +137,14 @@ const MergeRequestsSection = ({ mergeRequests }) => {
 };
 
 // 主项目详情组件
-const ProjectDetails = ({ projectDetails, commits, branches, mergeRequests }) => {
+const ProjectDetails = ({ projectDetails, commits, branches, mergeRequests, boundRepository, onRepositoryUnbound }) => {
   return (
     <div className={styles.projectDetailsContainer}>
-      <ProjectInfo project={projectDetails} />
+      <ProjectInfo 
+        project={projectDetails} 
+        boundRepository={boundRepository}
+        onRepositoryUnbound={onRepositoryUnbound}
+      />
       <BranchesSection branches={branches} />
       <CommitsSection commits={commits} />
       <MergeRequestsSection mergeRequests={mergeRequests} />
