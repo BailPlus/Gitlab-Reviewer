@@ -87,7 +87,10 @@ export default function Home() {
               <RepositoryBinding onRepositoryBound={handleRepositoryBound} />
             ) : (
               // 如果选中了项目，显示分析结果
-              <AnalysisResult analysisId={selectedProject.analysis_id} />
+              <AnalysisResult 
+                analysisId={selectedProject.analysis_id} 
+                project={selectedProject}
+              />
             )}
           </div>
         </main>

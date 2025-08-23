@@ -1282,3 +1282,38 @@
   font-size: 1.2rem;
   color: #666;
 }
+
+/* 文件引用链接样式 */
+.fileReferenceLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e1e8ed;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+  margin: 0 0.2rem;
+  white-space: nowrap;
+}
+
+.fileReferenceLink:hover {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fileName {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.lineRange {
+  color: #666;
+  font-weight: normal;
+}
