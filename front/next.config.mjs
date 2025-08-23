@@ -24,16 +24,22 @@ const nextConfig = {
       },
     },
   },
-  // API 路由转发配置
+    // API 路由转发配置
   async rewrites() {
+    const backendBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
+    
     return [
       {
+        source: '/api/v4/:path*',
+        destination: `${process.env.NEXT_PUBLIC_GITLAB_BASE_URL}/api/v4/:path*`,
+      },
+      {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/api/:path*`,
+        destination: `${backendBaseUrl}/api/:path*`,
       },
       {
         source: '/_/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'}/_/:path*`,
+        destination: `${backendBaseUrl}/_/:path*`,
       },
     ];
   },

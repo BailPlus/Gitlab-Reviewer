@@ -50,14 +50,15 @@ const RepositoryBinding = ({ onRepositoryBound }) => {
 
   // 搜索公开仓库
   const searchRepositories = async (query) => {
-    if (!query.trim()) {
+    const searchQuery = query.split('/').pop(); // 只使用/后的部分进行搜索
+    if (!searchQuery.trim()) {
       setSearchResults([]);
       return;
     }
 
     setSearching(true);
     try {
-      const repos = await gitlabService.getProjects({ search: query, per_page: 10 });
+      const repos = await gitlabService.getProjects({ search: searchQuery, per_page: 10 });
       const filteredRepos = repos.filter(repo => 
         repo.path_with_namespace.toLowerCase().includes(query.toLowerCase()) &&
         !boundRepositoryIds.includes(repo.id) // 过滤掉已绑定的仓库
@@ -177,7 +178,7 @@ const RepositoryBinding = ({ onRepositoryBound }) => {
               onChange={handleInputChange}
               onFocus={handleInputFocus}
               onKeyPress={handleKeyPress}
-              placeholder="搜索或输入仓库名称 (例如: username/repository)"
+              placeholder="搜索或输入仓库名称 (例如: repository)"
               className={styles.repositorySearchInput}
             />
             <button
@@ -222,9 +223,6 @@ const RepositoryBinding = ({ onRepositoryBound }) => {
                           )}
                         </div>
                       </div>
-                      <div className={styles.repoStats}>
-                        <span>⭐ {repo.star_count || 0}</span>
-                      </div>
                     </div>
                   ))
                 ) : (
@@ -261,9 +259,6 @@ const RepositoryBinding = ({ onRepositoryBound }) => {
                             <span className={styles.description}>{repo.description}</span>
                           )}
                         </div>
-                      </div>
-                      <div className={styles.repoStats}>
-                        <span>⭐ {repo.star_count || 0}</span>
                       </div>
                     </div>
                   ))

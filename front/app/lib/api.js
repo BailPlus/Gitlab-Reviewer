@@ -52,6 +52,7 @@ const gitlabApi = createRequest(GITLAB_BASE_URL);
 
 // 后端API请求函数
 const backendApi = async (endpoint, options = {}) => {
+  // 确保endpoint以/开头，但不会重复添加
   const url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   
   try {
@@ -62,9 +63,15 @@ const backendApi = async (endpoint, options = {}) => {
       },
       ...options,
     });
-    
+
+    // 检查响应是否OK，如果不OK，尝试解析JSON获取错误信息
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.info || `HTTP error! status: ${response.status}`;
+      const error = new Error(errorMessage);
+      error.response = response;
+      error.status = response.status;
+      throw error;
     }
     
     return await response.json();
@@ -140,10 +147,12 @@ export const backendService = {
     }),
   },
   
-  // 分析相关API (示例)
+  // 分析相关API
   analysis: {
-    // 获取项目分析
-    getProjectAnalysis: (projectId) => backendApi(`/api/analysis/project/${projectId}`),
+    // 获取分析结果
+    getAnalysisResult(analysisId) {
+      return backendApi(`/api/analysis/${analysisId}`);
+    },
     
     // 创建分析任务
     createAnalysis: (data) => backendApi('/api/analysis', {

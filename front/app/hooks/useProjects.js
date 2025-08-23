@@ -6,60 +6,60 @@ import { gitlabService, backendService } from '../lib/api';
 
 export const useProjects = (user) => {
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   const fetchProjects = async () => {
     if (!user) {
       setProjects([]);
+      setLoading(false);
       return;
     }
-
     setLoading(true);
-    setError(null);
-
     try {
-      // 获取用户绑定的仓库ID列表
       const response = await backendService.repositories.getBoundRepositories();
-      if (response.status === 0) {
-        const boundRepoIds = response.data || []; // 格式: [{"id": 4}, {"id": 5}, ...]
+      if (response.status === 0 && response.data) {
+        const boundReposInfo = response.data;
         
-        if (boundRepoIds.length === 0) {
-          setProjects([]);
-          return;
-        }
+        if (boundReposInfo.length > 0) {
+          const repoDetailsPromises = boundReposInfo.map(repo => 
+            gitlabService.getProject(repo.id)
+          );
+          const gitlabRepos = await Promise.all(repoDetailsPromises);
 
-        // 通过GitLab API获取每个仓库的详细信息
-        const projectPromises = boundRepoIds.map(async (repoData) => {
-          try {
-            const projectDetails = await gitlabService.getProject(repoData.id);
+          const mergedProjects = gitlabRepos.map(gitlabRepo => {
+            const boundInfo = boundReposInfo.find(b => b.id === gitlabRepo.id);
             return {
-              id: projectDetails.id,
-              name: projectDetails.path_with_namespace,
-              ...projectDetails // 包含完整的项目信息
+              ...gitlabRepo,
+              analysis_id: boundInfo ? boundInfo.analysis_id : null,
             };
-          } catch (error) {
-            console.error(`Failed to fetch project ${repoData.id}:`, error);
-            return {
-              id: repoData.id,
-              name: `Unknown Repository (ID: ${repoData.id})`,
-              error: true
-            };
+          });
+          setProjects(mergedProjects);
+          // 默认选中第一个项目
+          if (mergedProjects.length > 0 && !selectedProject) {
+            setSelectedProject(mergedProjects[0]);
           }
-        });
-
-        const projectsData = await Promise.all(projectPromises);
-        setProjects(projectsData.filter(p => !p.error)); // 过滤掉错误的项目
+        } else {
+          setProjects([]);
+          setSelectedProject(null);
+        }
       } else {
-        throw new Error(response.info || 'Failed to fetch repositories');
+        setProjects([]);
+        setSelectedProject(null);
       }
-    } catch (error) {
-      console.error('Failed to fetch bound repositories:', error);
-      setError(error.message);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
       setProjects([]);
+      setSelectedProject(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  const clearProject = () => {
+    setSelectedProject(null);
   };
 
   useEffect(() => {
@@ -71,6 +71,9 @@ export const useProjects = (user) => {
     loading,
     error,
     refetch: fetchProjects,
+    selectedProject,
+    setSelectedProject,
+    clearProject,
   };
 };
 

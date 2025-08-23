@@ -1,11 +1,11 @@
 "use client";
 
 import { useAuth } from "./hooks/useAuth";
-import { useProjects, useProjectDetails } from "./hooks/useProjects";
+import { useProjects } from "./hooks/useProjects";
 import { useModal } from "./hooks/useUI";
 import LoginOverlay from "./components/LoginOverlay";
 import Sidebar from "./components/Sidebar";
-import ProjectDetails from "./components/ProjectDetails";
+import AnalysisResult from "./components/AnalysisResult"; // 导入新组件
 import RepositoryBinding from "./components/RepositoryBinding";
 import SettingsModal from "./components/SettingsModal";
 import { LoadingSpinner } from "./components/ui/Skeleton";
@@ -16,24 +16,21 @@ export default function Home() {
   const { user, loading: authLoading, login, logout, isAuthenticated } = useAuth();
   
   // 项目相关状态
-  const { projects, loading: projectsLoading, refetch: refetchProjects } = useProjects(user);
-  const {
+  const { 
+    projects, 
+    loading: projectsLoading, 
+    refetch: refetchProjects,
     selectedProject,
-    projectDetails,
-    commits,
-    branches,
-    mergeRequests,
-    loading: detailsLoading,
-    fetchProjectDetails,
+    setSelectedProject,
     clearProject,
-  } = useProjectDetails();
+  } = useProjects(user);
   
   // UI状态
   const settingsModal = useModal();
 
   // 处理项目选择
   const handleProjectSelect = (project) => {
-    fetchProjectDetails(project);
+    setSelectedProject(project);
   };
 
   // 处理登出
@@ -86,29 +83,21 @@ export default function Home() {
         <main className={styles.main}>
           <div className={styles.mainContent}>
             {!selectedProject ? (
-              // 如果没有已绑定的项目，显示仓库绑定界面（Codex风格）
+              // 如果没有已绑定的项目，显示仓库绑定界面
               <RepositoryBinding onRepositoryBound={handleRepositoryBound} />
-            ) : detailsLoading ? (
-              <LoadingSpinner message="加载项目信息中..." />
             ) : (
-              <ProjectDetails
-                projectDetails={projectDetails}
-                commits={commits}
-                branches={branches}
-                mergeRequests={mergeRequests}
-                boundRepository={selectedProject}
-                onRepositoryUnbound={handleRepositoryUnbound}
-              />
+              // 如果选中了项目，显示分析结果
+              <AnalysisResult analysisId={selectedProject.analysis_id} />
             )}
           </div>
         </main>
       </div>
 
-      {/* 设置模态框 */}
+      {/* 设置弹窗 */}
       <SettingsModal
+        user={user}
         isOpen={settingsModal.isOpen}
         onClose={settingsModal.close}
-        user={user}
         onLogout={handleLogout}
       />
     </div>
