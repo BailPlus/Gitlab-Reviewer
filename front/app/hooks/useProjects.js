@@ -37,9 +37,9 @@ export const useProjects = (user) => {
           });
           setProjects(mergedProjects);
           // 默认选中第一个项目
-          if (mergedProjects.length > 0 && !selectedProject) {
-            setSelectedProject(mergedProjects[0]);
-          }
+          // if (mergedProjects.length > 0 && !selectedProject) {
+          //   setSelectedProject(mergedProjects[0]);
+          // }
         } else {
           setProjects([]);
           setSelectedProject(null);

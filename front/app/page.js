@@ -8,6 +8,7 @@ import Sidebar from "./components/Sidebar";
 import AnalysisResult from "./components/AnalysisResult"; // 导入新组件
 import RepositoryBinding from "./components/RepositoryBinding";
 import SettingsModal from "./components/SettingsModal";
+import RepositorySettingsModal from "./components/RepositorySettingsModal";
 import { LoadingSpinner } from "./components/ui/Skeleton";
 import styles from "./page.module.css";
 
@@ -27,10 +28,19 @@ export default function Home() {
   
   // UI状态
   const settingsModal = useModal();
+  const repositorySettingsModal = useModal();
 
   // 处理项目选择
   const handleProjectSelect = (project) => {
-    setSelectedProject(project);
+    // 如果点击的是当前已选中的项目，先设为null再设回来，强制刷新
+    if (selectedProject && selectedProject.id === project.id) {
+      setSelectedProject(null);
+      setTimeout(() => {
+        setSelectedProject(project);
+      }, 0);
+    } else {
+      setSelectedProject(project);
+    }
   };
 
   // 处理登出
@@ -53,6 +63,17 @@ export default function Home() {
   // 处理添加仓库（取消选中当前项目，显示绑定界面）
   const handleAddRepository = () => {
     clearProject(); // 清除当前选中的项目，这样会显示仓库绑定界面
+  };
+
+  // 处理仓库设置
+  const handleRepositorySettings = () => {
+    repositorySettingsModal.open();
+  };
+
+  // 处理分析触发完成
+  const handleAnalysisTriggered = () => {
+    // 可以在这里添加刷新逻辑，或者显示提示信息
+    repositorySettingsModal.close();
   };
 
   return (
@@ -90,6 +111,7 @@ export default function Home() {
               <AnalysisResult 
                 analysisId={selectedProject.analysis_id} 
                 project={selectedProject}
+                onRepositorySettings={handleRepositorySettings}
               />
             )}
           </div>
@@ -102,6 +124,15 @@ export default function Home() {
         isOpen={settingsModal.isOpen}
         onClose={settingsModal.close}
         onLogout={handleLogout}
+      />
+
+      {/* 仓库设置弹窗 */}
+      <RepositorySettingsModal
+        isOpen={repositorySettingsModal.isOpen}
+        onClose={repositorySettingsModal.close}
+        project={selectedProject}
+        onAnalysisTriggered={handleAnalysisTriggered}
+        onRepositoryUnbound={handleRepositoryUnbound}
       />
     </div>
   );

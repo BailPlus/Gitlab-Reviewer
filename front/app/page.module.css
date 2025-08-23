@@ -388,11 +388,13 @@
 }
 
 .projectInfo {
-  background: white;
-  border: 1px solid rgb(var(--border-rgb));
-  border-radius: 12px;
-  padding: 24px;
   margin-bottom: 24px;
+  margin-top: 16px;
+}
+
+.projectInfo h3 {
+  font-size: 1.5rem; /* 增大字体 */
+  margin-bottom: 8px;
 }
 
 .projectHeader {
@@ -703,15 +705,19 @@
   backdrop-filter: blur(4px);
 }
 
+/* RepositorySettingsModal.js */
 .settingsModal {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  max-width: 480px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
   width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  animation: modalSlideIn 0.3s ease-out;
+  max-width: 550px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 @keyframes modalSlideIn {
@@ -1316,4 +1322,181 @@
 .lineRange {
   color: #666;
   font-weight: normal;
+}
+
+/* 分析容器和标题栏样式 */
+.analysisContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.analysisHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem 2rem 1rem 2rem;
+  background: #ffffff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.projectInfo {
+  flex: 1;
+}
+
+.projectName {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.projectDescription {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.repositorySettingsButton {
+  color: rgb(var(--foreground-rgb));
+  background: none;
+  border: 1px solid rgba(var(--foreground-rgb), 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.repositorySettingsButton:hover {
+  background-color: rgba(var(--foreground-rgb), 0.05);
+  border-color: rgba(var(--foreground-rgb), 0.3);
+}
+
+/* 仓库设置模态框样式 */
+.projectInfo h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.projectUrl {
+  color: #1976d2;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+  word-break: break-all;
+}
+
+.projectBranch {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.analysisSection {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.analysisSection h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.analysisTip {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+}
+
+.triggerAnalysisButton {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.triggerAnalysisButton:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+.triggerAnalysisButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.triggerAnalysisButton.loading {
+  background-color: #ccc;
+}
+
+.message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* 解绑仓库区域样式 */
+.unbindSection {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.unbindSection h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #dc2626; /* 红色标题以示警告 */
+}
+
+.unbindTip {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+}
+
+.unbindButton {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.unbindButton:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.unbindButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.unbindButton.loading {
+  background-color: #ccc;
 }

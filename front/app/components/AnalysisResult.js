@@ -8,7 +8,7 @@ import styles from '../page.module.css';
 import { LoadingSpinner } from './ui/Skeleton';
 import GitLabIcon from './ui/GitLabIcon';
 
-const AnalysisResult = ({ analysisId, project }) => {
+const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -102,67 +102,98 @@ const AnalysisResult = ({ analysisId, project }) => {
     }
   }, [result]);
 
-  if (loading) {
-    return <LoadingSpinner message="正在加载分析结果..." />;
-  }
-
-  if (error) {
-    return (
-      <div className={styles.analysisStatus}>
-        <p>{error}</p>
-      </div>
-    );
-  }
+  // 渲染分析内容
+  const renderContent = () => {
+    if (loading) {
+      return <LoadingSpinner message="正在加载分析结果..." />;
+    }
+    if (error) {
+      return (
+        <div className={styles.analysisStatus}>
+          <p>{error}</p>
+        </div>
+      );
+    }
+    if (result) {
+      return (
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            code({ node, inline, className, children, ...props }) {
+              const match = /language-(\w+)/.exec(className || '');
+              if (match && match[1] === 'mermaid') {
+                return (
+                  <div className="language-mermaid" {...props}>
+                    {String(children)}
+                  </div>
+                );
+              }
+              return !inline && match ? (
+                <pre className={styles.codeBlock}>
+                  <code className={className} {...props}>
+                    {String(children).replace(/\n$/, '')}
+                  </code>
+                </pre>
+              ) : (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            },
+            a({ href, children, ...props }) {
+              // 检查是否是文件引用链接
+              const childText = extractTextFromChildren(children);
+              
+              // 匹配格式: `README.md` 或 `README.md:1-10`
+              const fileReferenceMatch = childText.match(/^`?([^`:]+)(?::(\d+(?:-\d+)?))?`?$/);
+              
+              if (fileReferenceMatch && (!href || href === '')) {
+                const [, filePath, lineRange] = fileReferenceMatch;
+                
+                // 新规则：如果包含行号，则始终视为文件链接。
+                // 如果没有行号，则要求文件名包含'.'或'/'以避免误判。
+                if (lineRange || filePath.includes('.') || filePath.includes('/')) {
+                  return <FileReferenceLink filePath={filePath} lineRange={lineRange} />;
+                }
+              }
+              
+              // 普通链接保持默认行为
+              return (
+                <a href={href} {...props}>
+                  {children}
+                </a>
+              );
+            },
+          }}
+        >
+          {result}
+        </ReactMarkdown>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div className={styles.analysisResult}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          code({ node, inline, className, children, ...props }) {
-            const match = /language-(\w+)/.exec(className || '');
-            if (match && match[1] === 'mermaid') {
-              return (
-                <div className="language-mermaid" {...props}>
-                  {String(children)}
-                </div>
-              );
-            }
-            return !inline && match ? (
-              <pre className={styles.codeBlock}>
-                <code className={className} {...props}>
-                  {String(children).replace(/\n$/, '')}
-                </code>
-              </pre>
-            ) : (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            );
-          },
-          a({ href, children, ...props }) {
-            // 检查是否是文件引用链接
-            const childText = extractTextFromChildren(children);
-            
-            // 匹配格式：proto/greeter.proto:1-13 或者 `proto/greeter.proto:1-13`
-            const fileReferenceMatch = childText.match(/^`?([^`]+):(\d+(?:-\d+)?)`?$/);
-            
-            if (fileReferenceMatch && (!href || href === '')) {
-              const [, filePath, lineRange] = fileReferenceMatch;
-              return <FileReferenceLink filePath={filePath} lineRange={lineRange} />;
-            }
-            
-            // 普通链接保持默认行为
-            return (
-              <a href={href} {...props}>
-                {children}
-              </a>
-            );
-          },
-        }}
-      >
-        {result}
-      </ReactMarkdown>
+    <div className={styles.analysisContainer}>
+      {/* 标题栏 */}
+      <div className={styles.analysisHeader}>
+        <div className={styles.projectInfo}>
+          <h1 className={styles.projectName}>{project?.name}</h1>
+          <p className={styles.projectDescription}>{project?.description || '暂无描述'}</p>
+        </div>
+        <button 
+          className={styles.repositorySettingsButton}
+          onClick={onRepositorySettings}
+          title="仓库设置"
+        >
+          <span>设置</span>
+        </button>
+      </div>
+      
+      {/* 分析结果内容 */}
+      <div className={styles.analysisResult}>
+        {renderContent()}
+      </div>
     </div>
   );
 };
