@@ -6,6 +6,7 @@ import { useModal } from "./hooks/useUI";
 import LoginOverlay from "./components/LoginOverlay";
 import Sidebar from "./components/Sidebar";
 import AnalysisResult from "./components/AnalysisResult"; // 导入新组件
+import CommitHistorySidebar from "./components/CommitHistorySidebar";
 import RepositoryBinding from "./components/RepositoryBinding";
 import SettingsModal from "./components/SettingsModal";
 import RepositorySettingsModal from "./components/RepositorySettingsModal";
@@ -116,6 +117,11 @@ export default function Home() {
             )}
           </div>
         </main>
+
+        {/* 右侧提交历史栏 */}
+        {selectedProject && (
+          <CommitHistorySidebar project={selectedProject} />
+        )}
       </div>
 
       {/* 设置弹窗 */}

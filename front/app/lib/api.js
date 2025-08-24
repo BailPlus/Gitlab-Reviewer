@@ -112,6 +112,17 @@ export const gitlabService = {
     const queryString = new URLSearchParams(params).toString();
     return gitlabApi(`/api/v4/projects/${projectId}/merge_requests?${queryString}`);
   },
+
+  // 获取项目事件（push事件）
+  getProjectEvents: (projectId, params = { action: 'pushed', per_page: 20 }) => {
+    const queryString = new URLSearchParams(params).toString();
+    return gitlabApi(`/api/v4/projects/${projectId}/events?${queryString}`);
+  },
+
+  // 比较两个提交
+  compareCommits: (projectId, from, to) => {
+    return gitlabApi(`/api/v4/projects/${projectId}/repository/compare?from=${from}&to=${to}`);
+  },
 };
 
 // 后端API服务
