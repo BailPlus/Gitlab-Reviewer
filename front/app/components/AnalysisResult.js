@@ -144,15 +144,27 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
               // 检查是否是文件引用链接
               const childText = extractTextFromChildren(children);
               
-              // 匹配格式: `README.md` 或 `README.md:1-10`
-              const fileReferenceMatch = childText.match(/^`?([^`:]+)(?::(\d+(?:-\d+)?))?`?$/);
+              // 匹配格式1: `README.md` 或 `README.md:1-10` (无href或href为空)
+              const fileReferenceMatch1 = childText.match(/^`?([^`:]+)(?::(\d+(?:-\d+)?))?`?$/);
               
-              if (fileReferenceMatch && (!href || href === '')) {
-                const [, filePath, lineRange] = fileReferenceMatch;
+              // 匹配格式2: [src/config_cache.py:10-70](src/config_cache.py) (有href)
+              const fileReferenceMatch2 = childText.match(/^`?([^`:]+):(\d+(?:-\d+)?)`?$/);
+              
+              if (fileReferenceMatch1 && (!href || href === '')) {
+                const [, filePath, lineRange] = fileReferenceMatch1;
                 
                 // 新规则：如果包含行号，则始终视为文件链接。
                 // 如果没有行号，则要求文件名包含'.'或'/'以避免误判。
                 if (lineRange || filePath.includes('.') || filePath.includes('/')) {
+                  return <FileReferenceLink filePath={filePath} lineRange={lineRange} />;
+                }
+              }
+              
+              // 处理有href的情况，链接文本包含行号但href只是文件路径
+              if (fileReferenceMatch2 && href && href.trim() !== '') {
+                const [, filePath, lineRange] = fileReferenceMatch2;
+                // 检查href是否与文件路径匹配（可能只是文件路径部分）
+                if (href.includes(filePath) || filePath.includes(href.replace(/^\.?\//, ''))) {
                   return <FileReferenceLink filePath={filePath} lineRange={lineRange} />;
                 }
               }

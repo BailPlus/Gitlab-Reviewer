@@ -133,6 +133,7 @@ export default function Home() {
         project={selectedProject}
         onAnalysisTriggered={handleAnalysisTriggered}
         onRepositoryUnbound={handleRepositoryUnbound}
+        onRefreshProjects={refetchProjects}
       />
     </div>
   );

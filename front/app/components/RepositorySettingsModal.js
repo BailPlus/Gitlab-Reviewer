@@ -4,12 +4,15 @@ import { useState, useEffect } from 'react';
 import styles from '../page.module.css';
 import { backendService } from '../lib/api';
 import NewTabIcon from './ui/NewTabIcon';
+import LoadingButton from './ui/LoadingButton';
+import ConfirmDialog from './ui/ConfirmDialog';
 
-const RepositorySettingsModal = ({ isOpen, onClose, project, onAnalysisTriggered, onRepositoryUnbound }) => {
+const RepositorySettingsModal = ({ isOpen, onClose, project, onAnalysisTriggered, onRepositoryUnbound, onRefreshProjects }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isUnbinding, setIsUnbinding] = useState(false);
   const [message, setMessage] = useState('');
   const [unbindMessage, setUnbindMessage] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
     // 当模态框打开时，重置所有状态，避免显示旧仓库的信息
@@ -18,6 +21,7 @@ const RepositorySettingsModal = ({ isOpen, onClose, project, onAnalysisTriggered
       setUnbindMessage('');
       setIsAnalyzing(false);
       setIsUnbinding(false);
+      setShowConfirmDialog(false);
     }
   }, [isOpen, project]); // 依赖于 isOpen 和 project，确保每次打开或切换项目时都重置
 
@@ -39,6 +43,10 @@ const RepositorySettingsModal = ({ isOpen, onClose, project, onAnalysisTriggered
         if (onAnalysisTriggered) {
           onAnalysisTriggered();
         }
+        // 重新加载仓库列表以获取最新的分析id
+        if (onRefreshProjects) {
+          onRefreshProjects();
+        }
       } else {
         setMessage(`分析失败: ${response.info}`);
       }
@@ -49,14 +57,16 @@ const RepositorySettingsModal = ({ isOpen, onClose, project, onAnalysisTriggered
     }
   };
 
+  // 显示解绑确认弹窗
+  const handleShowUnbindConfirm = () => {
+    setShowConfirmDialog(true);
+  };
+
   // 解绑仓库
   const handleUnbindRepository = async () => {
     if (!project) return;
 
-    if (!window.confirm(`确定要解绑仓库 "${project.name}" 吗？此操作不可逆。`)) {
-      return;
-    }
-
+    setShowConfirmDialog(false);
     setIsUnbinding(true);
     setUnbindMessage('');
 
@@ -102,13 +112,13 @@ const RepositorySettingsModal = ({ isOpen, onClose, project, onAnalysisTriggered
             <h4>分析管理</h4>
             <p className={styles.analysisTip}>手动触发仓库代码分析，生成新的分析报告。</p>
             
-            <button 
-              className={`${styles.triggerAnalysisButton} ${isAnalyzing ? styles.loading : ''}`}
+            <LoadingButton 
+              className={styles.triggerAnalysisButton}
               onClick={handleTriggerAnalysis}
-              disabled={isAnalyzing}
+              isLoading={isAnalyzing}
             >
               {isAnalyzing ? '分析中...' : '触发分析'}
-            </button>
+            </LoadingButton>
             
             {message && (
               <div className={`${styles.message} ${
@@ -124,13 +134,13 @@ const RepositorySettingsModal = ({ isOpen, onClose, project, onAnalysisTriggered
             <h4>危险操作</h4>
             <p className={styles.unbindTip}>解绑仓库将删除所有相关数据，此操作不可逆。</p>
             
-            <button
-              className={`${styles.unbindButton} ${isUnbinding ? styles.loading : ''}`}
-              onClick={handleUnbindRepository}
-              disabled={isUnbinding}
+            <LoadingButton
+              className={styles.unbindButton}
+              onClick={handleShowUnbindConfirm}
+              isLoading={isUnbinding}
             >
               {isUnbinding ? '解绑中...' : '解绑仓库'}
-            </button>
+            </LoadingButton>
 
             {unbindMessage && (
               <div className={`${styles.message} ${
@@ -142,6 +152,18 @@ const RepositorySettingsModal = ({ isOpen, onClose, project, onAnalysisTriggered
           </div>
         </div>
       </div>
+
+      {/* 确认弹窗 */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleUnbindRepository}
+        title="确认解绑仓库"
+        message={`确定要解绑仓库 "${project?.name}" 吗？你将不会再看到该仓库的相关信息 。`}
+        confirmText="解绑"
+        cancelText="取消"
+        isDestructive={true}
+      />
     </div>
   );
 };
