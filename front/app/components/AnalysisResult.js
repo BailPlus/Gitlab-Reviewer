@@ -7,11 +7,15 @@ import mermaid from 'mermaid';
 import styles from '../page.module.css';
 import { LoadingSpinner } from './ui/Skeleton';
 import GitLabIcon from './ui/GitLabIcon';
+import { backendService } from '../lib/api';
 
 const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [analysisHistory, setAnalysisHistory] = useState([]);
+  const [currentAnalysisId, setCurrentAnalysisId] = useState(analysisId);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   // 创建 GitLab 文件链接
   const createGitLabFileLink = (filePath, lineRange) => {
@@ -68,12 +72,36 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
   };
 
   useEffect(() => {
-    if (analysisId) {
+    setCurrentAnalysisId(analysisId);
+  }, [analysisId]);
+
+  // 获取分析历史
+  useEffect(() => {
+    if (project?.id) {
+      const fetchAnalysisHistory = async () => {
+        setHistoryLoading(true);
+        try {
+          const response = await backendService.analysis.getAnalysisHistory(project.id);
+          if (response.status === 0) {
+            setAnalysisHistory(response.data.analysis_history || []);
+          }
+        } catch (error) {
+          console.error('获取分析历史失败:', error);
+        } finally {
+          setHistoryLoading(false);
+        }
+      };
+      fetchAnalysisHistory();
+    }
+  }, [project?.id]);
+
+  useEffect(() => {
+    if (currentAnalysisId) {
       const fetchAnalysis = async () => {
         setLoading(true);
         setError(null);
         try {
-          const res = await fetch(`/api/analysis/${analysisId}`);
+          const res = await fetch(`/api/analysis/${currentAnalysisId}`);
           const data = await res.json();
 
           if (data.status === 0) {
@@ -92,7 +120,7 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
       };
       fetchAnalysis();
     }
-  }, [analysisId]);
+  }, [currentAnalysisId]);
 
   useEffect(() => {
     if (result) {
@@ -193,13 +221,34 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
           <h1 className={styles.projectName}>{project?.name}</h1>
           <p className={styles.projectDescription}>{project?.description || '暂无描述'}</p>
         </div>
-        <button 
-          className={styles.repositorySettingsButton}
-          onClick={onRepositorySettings}
-          title="仓库设置"
-        >
-          <span>设置</span>
-        </button>
+        <div className={styles.headerActions}>
+          {/* 分析历史选择 */}
+          {analysisHistory.length > 0 && (
+            <div className={styles.analysisSelector}>
+              <label htmlFor="analysis-select">分析版本:</label>
+              <select 
+                id="analysis-select"
+                value={currentAnalysisId || ''}
+                onChange={(e) => setCurrentAnalysisId(parseInt(e.target.value))}
+                className={styles.analysisSelect}
+                disabled={historyLoading}
+              >
+                {analysisHistory.map((id) => (
+                  <option key={id} value={id}>
+                    分析 #{id} {id === analysisId ? '(最新)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <button 
+            className={styles.repositorySettingsButton}
+            onClick={onRepositorySettings}
+            title="仓库设置"
+          >
+            <span>设置</span>
+          </button>
+        </div>
       </div>
       
       {/* 分析结果内容 */}

@@ -1341,6 +1341,43 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.analysisSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analysisSelector label {
+  font-size: 0.9rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.analysisSelect {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: white;
+  min-width: 120px;
+}
+
+.analysisSelect:focus {
+  outline: none;
+  border-color: #0070f3;
+}
+
+.analysisSelect:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
 .projectInfo {
   flex: 1;
 }

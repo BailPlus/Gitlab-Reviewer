@@ -159,6 +159,9 @@ export const backendService = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+    // 获取分析历史
+    getAnalysisHistory: (repoId) => backendApi(`/api/analysis/history?repo_id=${repoId}`),
   },
 };
 
