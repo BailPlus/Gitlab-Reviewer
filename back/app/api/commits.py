@@ -15,7 +15,7 @@ async def gitlab_webhook_receiver(request: Request):
     # 解析webhook数据
     data: dict = await request.json()
     if data['event_name'] != 'push':
-        return
+        return EmptyOutput()
     repo_id = data['project_id']
     before = data['before']
     after = data['after']

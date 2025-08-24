@@ -33,14 +33,26 @@ def get_review(review_id: int) -> CommitReview:
     return review
 
 
+# def get_review_by_commit_id(commit_id: str) -> CommitReview:
+#     with get_session() as session:
+#         review = (session.exec(
+#             select(CommitReviewBinding)
+#             .filter_by(commit_id=commit_id)
+#         )
+#         .one()
+#         .review)
+#     if review is None:
+#         raise ReviewNotExist
+#     return review
+
+
 def get_review_by_commit_id(commit_id: str) -> CommitReview:
     with get_session() as session:
         review = (session.exec(
-            select(CommitReviewBinding)
-            .filter_by(commit_id=commit_id)
+            select(CommitReview)
+            .filter_by(after_commit=commit_id)
         )
-        .one()
-        .review)
+        .one_or_none())
     if review is None:
         raise ReviewNotExist
     return review

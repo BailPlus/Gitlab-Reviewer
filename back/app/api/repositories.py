@@ -16,7 +16,8 @@ async def get_repositories(request: Request):
     token = get_token_from_cookie(request)
     repos = get_user_binded_repos(token.user.id)
     return BaseOutput(data=[repo_models.GetRepositoriesOutput(
-        id=repo.id
+        id=repo.id,
+        analysis_id=repo.analysis_id # type: ignore
     ) for repo in repos])
 
 

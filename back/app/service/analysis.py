@@ -7,6 +7,7 @@ from ..db import analysis as db
 from ..errors.analysis import *
 from ..openai import openai
 from . import auth
+import traceback
 
 __all__ = [
     "analyze",
@@ -19,7 +20,7 @@ __all__ = [
 def analyze(token: Token, repo_id: int, branch: Optional[str] = None):
     """进行分析"""
     auth.check_repo_permission(token.user_id, repo_id)
-    gl = auth.verify_gitlab_token(token.token)
+    gl = auth.get_root_gitlab_obj()
     if branch is None:
         branch = _get_default_branch(gl, repo_id)
     _create_analysis(repo_id)
@@ -62,14 +63,15 @@ def _analyze_thread(gl: Gitlab, repo_id: int, branch: str):
         analysis_json = openai.generate_repo_analysis(gl, repo_id, branch)
     except Exception:
         db.fail_analysis(repo_id)   # XXX: 需要给出错误信息
+        traceback.print_exc()   # XXX: 建议改为log
     else:
         db.update_analysis(repo_id, analysis_json)
 
 
 def _score_thread(gl: Gitlab, repo_id: int, branch: str):
     try:
-        raise NotImplementedError   # TODO
-        score = NotImplemented
+        ##raise NotImplementedError   # TODO
+        score = -1
     except Exception:
         db.fail_analysis(repo_id)
         db.save_score(repo_id, -1)

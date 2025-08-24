@@ -7,6 +7,8 @@ from ..model.repositories import Repository
 from ..model.repository_bindings import RepositoryBinding
 from ..model.repository_analyses import RepositoryAnalysis
 from ..model.repository_metrics import RepositoryMetric
+from ..model.commit_reviews import CommitReview
+from ..model.commit_review_bindings import CommitReviewBinding
 
 engine = create_engine(
     settings.database_url,

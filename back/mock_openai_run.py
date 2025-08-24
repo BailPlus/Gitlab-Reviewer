@@ -7,13 +7,13 @@ from app import app
 import uvicorn
 
 
-def mock_openai_generate_repo_analysis(gl, project_id, ref):
-    return f'正在模拟对仓库ID {project_id} 分支 {ref} 的分析结果'
-openai.generate_repo_analysis = mock_openai_generate_repo_analysis
+# def mock_openai_generate_repo_analysis(gl, project_id, ref):
+#     return f'正在模拟对仓库ID {project_id} 分支 {ref} 的分析结果'
+# openai.generate_repo_analysis = mock_openai_generate_repo_analysis
 
-def mock_openai_generate_commit_review(gl, project_id, before_sha, after_sha):
-    return f'正在模拟对仓库ID {project_id} 从 {before_sha} 到 {after_sha} 的分析结果'
-openai.generate_commit_review = mock_openai_generate_commit_review
+# def mock_openai_generate_commit_review(gl, project_id, before_sha, after_sha):
+#     return f'正在模拟对仓库ID {project_id} 从 {before_sha} 到 {after_sha} 的分析结果'
+# openai.generate_commit_review = mock_openai_generate_commit_review
 
 # patch_app
 # @app.get("/")
@@ -30,4 +30,4 @@ async def show_pkg(request, call_next):
     return await call_next(request)
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="localhost", port=8000, reload=True)
+    uvicorn.run("app:app", host="localhost", port=8000, reload=False)

@@ -1,7 +1,6 @@
 from sqlmodel import select, and_
 from ..model.repositories import Repository
 from ..model.repository_bindings import RepositoryBinding
-from ..model.users import User
 from ..errors.repositories import *
 from . import get_session
 

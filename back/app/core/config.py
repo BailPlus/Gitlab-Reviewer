@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     gitlab_client_id: str = ""
     gitlab_client_secret: str = ""
     gitlab_webhook_token: str = ""  # webhook防伪token
+    gitlab_root_private_token: str = "" # gitlab root用户token，用于获取所有项目的信息
     openai_base_url: str = ""
     openai_api_key: str = ""
     openai_model: str = ""

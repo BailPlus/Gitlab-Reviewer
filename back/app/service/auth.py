@@ -42,13 +42,21 @@ async def get_token_from_callback_code(code: str) -> GitlabToken:
 
 
 def verify_gitlab_token(token: str) -> Gitlab:
-    gl = Gitlab(settings.gitlab_url)
-    gl.oauth_token = token
-    gl._set_auth_info()
+    gl = Gitlab(settings.gitlab_url, oauth_token=token)
     try:
         gl.auth()
     except gitlab.exceptions.GitlabAuthenticationError as e:
         raise InvalidGitlabToken from e
+    return gl
+
+
+def get_root_gitlab_obj() -> Gitlab:
+    root_token = settings.gitlab_root_private_token
+    gl = Gitlab(settings.gitlab_url, private_token=root_token)
+    try:
+        gl.auth()
+    except gitlab.exceptions.GitlabAuthenticationError as e:
+        raise InvalidGitlabToken(info='gitlab root private token无效') from e
     return gl
 
 

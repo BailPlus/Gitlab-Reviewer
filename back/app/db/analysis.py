@@ -26,7 +26,7 @@ def get_analysis_history(repo_id: int) -> list[int]:
         analyses = session.exec(
             select(RepositoryAnalysis.id)
             .where(RepositoryAnalysis.repo_id == repo_id)
-            .order_by(desc(RepositoryAnalysis.id))
+            .order_by(desc(RepositoryAnalysis.created_at))
         ).all()
     return list(analyses)
 
@@ -71,13 +71,14 @@ def fail_analysis(repo_id: int):
 
 def get_score(repo_id: int) -> float:
     with get_session() as session:
-        return (session.exec(
+        metric = (session.exec(
             select(RepositoryMetric)
             .filter_by(repo_id=repo_id)
             .order_by(desc(RepositoryMetric.created_at))
         )
-        .one()
-        .quality_score)
+        .first())
+    assert metric is not None
+    return metric.quality_score
 
 
 def save_score(repo_id: int, score: float):

@@ -1,3 +1,4 @@
+from threading import Thread
 from ..core.config import settings
 from ..errors.auth import InvalidGitlabWebhookToken
 from ..errors.commits import *
@@ -22,7 +23,7 @@ def verify_gitlab_webhook_token(token: str|None):
 
 
 def review_commit(repo_id: int, before: str, after: str):
-    _review_thread(repo_id, before, after)
+    Thread(target=_review_thread, args=(repo_id, before, after)).start()
 
 
 def get_review_by_commit(token: Token, commit_id: str) -> CommitReview:
@@ -56,7 +57,7 @@ def _fail_review(review: CommitReview):
 
 def _review_thread(repo_id: int, before: str, after: str):
     review = _create_pending_review(repo_id, before, after)
-    gl = auth.verify_gitlab_token(token)    # FIXME: token如何解决
+    gl = auth.get_root_gitlab_obj()
     try:
         review_json = generate_commit_review(gl, repo_id, before, after)
     except Exception as e:

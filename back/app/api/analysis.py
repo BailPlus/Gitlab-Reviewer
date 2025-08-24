@@ -6,7 +6,7 @@ from ..service.analysis import *
 router = APIRouter(prefix='/api/analysis')
 
 
-@router.post('/', response_model=EmptyOutput)
+@router.post('', response_model=EmptyOutput)
 async def post_analysis(
     request: Request,
     input_schema: analysis_models.PostAnalysisInput,
@@ -39,8 +39,8 @@ async def get_analysis_route(
     analysis_obj = get_analysis(token, analysis_id)
     score = get_score(token, analysis_obj.repo_id)
     assert analysis_obj.analysis_json is not None
-    return analysis_models.GetAnalysisOutput(
+    return BaseOutput(data=analysis_models.GetAnalysisOutput(
         analyze_time=int(analysis_obj.created_at.timestamp()),
         result=analysis_obj.analysis_json,
         score=score
-    )
+    ))
