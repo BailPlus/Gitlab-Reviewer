@@ -7,7 +7,7 @@ from ..schema.auth import GitlabToken
 from ..model.tokens import Token
 from ..errors.auth import InvalidGitlabToken
 from ..db import auth as db
-from . import repositories
+from . import repositories, notifications
 import time, gitlab.exceptions
 
 __all__ = [
@@ -72,7 +72,9 @@ async def login(code: str) -> Token:
     email = gl.user.email
 
     # 向数据库更新用户信息
-    db.save_userinfo(uid, username, email)
+    registered = db.save_userinfo(uid, username, email)
+    if not registered:
+        notifications.create_default_notification_settings(uid)
 
     # 保存token到数据库
     exp = int(time.time()) + gl_token.token_age

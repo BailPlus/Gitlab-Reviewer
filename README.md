@@ -264,14 +264,14 @@
     "status": 0,
     "info": "ok",
     "data": {
-      "notifications": {
+      "notify_level": 1,
       "email": {
         "enabled": true,
-        "address": "user@example.com"
       },
-      "telegram": {
+      "webhook": {
         "enabled": true,
-        "chat_id": "string"
+        "url": "https://example.com/webhook",
+        "secret": "..."
       }
     }
   }
@@ -282,15 +282,14 @@
   Cookie: token=...
   
   {
-    "notifications": {
-      "email": {
-        "enabled": true,
-        "address": "user@example.com"
-      },
-      "telegram": {
-        "enabled": true,
-        "chat_id": "string"
-      }
+    "notify_level": 1,
+    "email": {
+      "enabled": true,
+    },
+    "webhook": {
+      "enabled": true,
+      "url": "https://example.com/webhook",
+      "secret": "..."
     }
   }
   ```
@@ -299,15 +298,14 @@
     "status": 0,
     "info": "ok",
     "data": {
-        "notifications": {
-        "email": {
-          "enabled": true,
-          "address": "user@example.com"
-        },
-        "telegram": {
-          "enabled": true,
-          "chat_id": "string"
-        }
+      "notify_level": 1,
+      "email": {
+        "enabled": true,
+      },
+      "webhook": {
+        "enabled": true,
+        "url": "https://example.com/webhook",
+        "secret": "..."
       }
     }
   }
@@ -448,16 +446,17 @@ uv run run.py
 
 #### `notification_settings` 表
 
-| 列名                 | 类型              | 可否为空 | 键       | 默认值                | 额外                           |
-| ------------------ | --------------- | ---- | ------- | ------------------ | ---------------------------- |
-| id                 | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT              |
-| user\_id           | BIGINT UNSIGNED | NO   | UNI(FK) |                    |                              |
-| via\_email         | TINYINT(1)      | NO   |         | 1                  |                              |
-| email\_address     | VARCHAR(100)    | YES  |         |                    |                              |
-| via\_telegram      | TINYINT(1)      | NO   |         | 0                  |                              |
-| telegram\_chat\_id | VARCHAR(100)    | YES  |         |                    |                              |
-| created\_at        | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                              |
-| updated\_at        | DATETIME        | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
+| 列名            | 类型              | 可否为空 | 键       | 默认值                | 额外                           |
+| ---------------- | --------------- | ---- | ------- | ------------------ | ---------------------------- |
+| id               | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT              |
+| user\_id         | BIGINT UNSIGNED | NO   | UNI(FK) |                    |                              |
+| notify\_level    | INTEGER ∈ [0,3] | NO   |         | 0                  |                              |
+| email\_enabled   | TINYINT(1)      | NO   |         | 0                  |                              |
+| webhook\_enabled | TINYINT(1)      | NO   |         | 0                  |                              |
+| webhook\_url     | VARCHAR(100)    | YES  |         | NULL               |                              |
+| webhook\_secret  | VARCHAR(100)    | YES  |         | NULL               |                              |
+| created\_at      | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                              |
+| updated\_at      | DATETIME        | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
 
 ## 前端
 

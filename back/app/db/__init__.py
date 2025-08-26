@@ -8,7 +8,7 @@ from ..model.repository_bindings import RepositoryBinding
 from ..model.repository_analyses import RepositoryAnalysis
 from ..model.repository_metrics import RepositoryMetric
 from ..model.commit_reviews import CommitReview
-from ..model.commit_review_bindings import CommitReviewBinding
+from ..model.notification_settings import NotificationSettings
 
 engine = create_engine(
     settings.database_url,

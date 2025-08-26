@@ -5,6 +5,7 @@ from .api import (
     repositories,
     analysis,
     commits,
+    notifications
 )
 from .errors import GitlabReviewerException
 
@@ -14,6 +15,7 @@ app.include_router(repositories.router)
 app.include_router(analysis.router)
 app.include_router(commits.webhook_router)
 app.include_router(commits.router)
+app.include_router(notifications.router)
 
 @app.exception_handler(GitlabReviewerException)
 async def gitlab_reviewer_exception_handler(request, exc: GitlabReviewerException):

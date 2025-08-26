@@ -1,7 +1,6 @@
 from typing import Optional
 from sqlmodel import select
 from ..model.commit_reviews import CommitReview, CommitReviewStatus
-from ..model.commit_review_bindings import CommitReviewBinding
 from ..errors.commits import *
 from . import get_session
 

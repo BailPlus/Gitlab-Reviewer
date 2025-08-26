@@ -1,5 +1,14 @@
+from enum import Enum
 from pydantic_settings import BaseSettings
 from gitlab import Gitlab
+
+
+class SmtpEncryption(str, Enum):
+    """SMTP加密方式"""
+    NONE = "none"
+    SSL = "ssl"
+    STARTTLS = "starttls"
+
 
 class Settings(BaseSettings):
     database_url: str = ""
@@ -15,6 +24,14 @@ class Settings(BaseSettings):
     openai_base_url: str = ""
     openai_api_key: str = ""
     openai_model: str = ""
+    enable_email: bool = False
+    smtp_host: str = ""
+    smtp_port: int = 25
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_encryption: SmtpEncryption = SmtpEncryption.NONE
+    email_from: str = ""
+
     class Config:
         env_file = ".env"   # 配置文件
         env_prefix = "GLRV_"    # 环境变量前缀
