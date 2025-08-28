@@ -9,6 +9,8 @@ from ..model.repository_analyses import RepositoryAnalysis
 from ..model.repository_metrics import RepositoryMetric
 from ..model.commit_reviews import CommitReview
 from ..model.notification_settings import NotificationSettings
+from ..model.mr_reviews import MrReview
+from ..model.webhook_logs import WebhookLog
 
 engine = create_engine(
     settings.database_url,

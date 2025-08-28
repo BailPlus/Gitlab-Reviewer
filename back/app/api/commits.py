@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Request
 from ..service.commits import *
+from ..service.auth import get_token_from_cookie
+from ..service.merge_requests import review_merge_request
 from ..schema import commits as commits_models
 from ..schema import BaseOutput, EmptyOutput
-from ..service.auth import get_token_from_cookie
+import json
 
 webhook_router = APIRouter(prefix='/api/webhooks')
 router = APIRouter(prefix='/api/commits')
@@ -10,16 +12,24 @@ router = APIRouter(prefix='/api/commits')
 
 @webhook_router.post('/gitlab', response_model=EmptyOutput)
 async def gitlab_webhook_receiver(request: Request):
+    # 验证webhook密钥
     verify_gitlab_webhook_token(request.headers.get('X-Gitlab-Token'))
-    
-    # 解析webhook数据
+
+    # 记录webhook数据
     data: dict = await request.json()
-    if data['event_name'] != 'push':
-        return EmptyOutput()
-    repo_id = data['project_id']
-    before = data['before']
-    after = data['after']
-    review_commit(repo_id, before, after)
+    record_webhook_received(json.dumps(data, ensure_ascii=False))
+
+    # 解析webhook数据
+    match data.get('event_name') or data.get('object_kind'):
+        case 'push':
+            repo_id = data['project_id']
+            before = data['before']
+            after = data['after']
+            review_commit(repo_id, before, after)
+        case 'merge_request':
+            repo_id = data['project']['id']
+            mr_iid = data['object_attributes']['iid']
+            review_merge_request(repo_id, mr_iid)
     return EmptyOutput()
 
 

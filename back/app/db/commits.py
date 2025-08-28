@@ -1,7 +1,9 @@
 from typing import Optional
 from sqlmodel import select
-from ..model.commit_reviews import CommitReview, CommitReviewStatus
-from ..errors.commits import *
+from ..model import ReviewStatus
+from ..model.commit_reviews import CommitReview
+from ..model.webhook_logs import WebhookLog
+from ..errors.review import *
 from . import get_session
 
 __all__ = [
@@ -57,9 +59,15 @@ def get_review_by_commit_id(commit_id: str) -> CommitReview:
     return review
 
 
-def update_review(review: CommitReview, status: CommitReviewStatus, review_json: Optional[str] = None):
+def update_review(review: CommitReview, status: ReviewStatus, review_json: Optional[str] = None):
     review.status = status
     review.review_json = review_json
     with get_session() as session:
         session.add(review)
+        session.commit()
+
+
+def record_webhook_received(data: str):
+    with get_session() as session:
+        session.add(WebhookLog(data=data))
         session.commit()

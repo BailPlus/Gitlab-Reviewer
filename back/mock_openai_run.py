@@ -24,6 +24,14 @@ def mock_openai_generate_commit_review(gl, project_id, before_sha, after_sha):
     })
 openai.generate_commit_review = mock_openai_generate_commit_review
 
+def mock_openai_generate_mr_review(gl, project_id, mr_iid):
+    return json.dumps({
+        'info': f'正在模拟对仓库ID {project_id} 的 {mr_iid} 号合并请求的分析结果',
+        'suggestion': {},
+        'level': 3
+    })
+openai.generate_mr_review = mock_openai_generate_mr_review
+
 # patch_app
 # @app.get("/")
 # async def root(request: Request):

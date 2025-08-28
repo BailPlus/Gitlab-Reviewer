@@ -1,10 +1,11 @@
 from threading import Thread
 from typing import Optional
 from gitlab import Gitlab
+from ..model import ReviewStatus
 from ..model.tokens import Token
 from ..model.repository_analyses import RepositoryAnalysis
 from ..db import analysis as db
-from ..errors.analysis import *
+from ..errors.review import *
 from ..openai import openai
 from . import auth
 import traceback
@@ -33,12 +34,12 @@ def get_analysis(token: Token, analysis_id: int) -> RepositoryAnalysis:
     analysis = db.get_analysis(analysis_id)
     auth.check_repo_permission(token.user.id, analysis.repo_id)
     match analysis.status:
-        case db.AnalysisStatus.COMPLETED:
+        case ReviewStatus.COMPLETED:
             return analysis
-        case db.AnalysisStatus.PENDING:
-            raise PendingAnalysis
-        case db.AnalysisStatus.FAILED:
-            raise FailedAnalysis
+        case ReviewStatus.PENDING:
+            raise PendingReview
+        case ReviewStatus.FAILED:
+            raise FailedReview
 
 
 def get_analysis_history(token: Token, repo_id: int) -> list[int]:

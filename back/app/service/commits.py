@@ -1,9 +1,10 @@
 from threading import Thread
 from ..core.config import settings
 from ..errors.auth import InvalidGitlabWebhookToken
-from ..errors.commits import *
+from ..errors.review import *
+from ..model import ReviewStatus
 from ..model.tokens import Token
-from ..model.commit_reviews import CommitReview, CommitReviewStatus
+from ..model.commit_reviews import CommitReview
 from . import auth, notifications
 from ..db import commits as db
 from ..openai import openai
@@ -15,6 +16,7 @@ __all__ = [
     'review_commit',
     'get_review_by_commit',
     'apply_commit_suggestions',
+    'record_webhook_received',
 ]
 
 
@@ -57,14 +59,13 @@ def review_commit(repo_id: int, before: str, after: str):
 
 def get_review_by_commit(token: Token, commit_id: str) -> CommitReview:
     review = db.get_review_by_commit_id(commit_id)
-    repo_id = review.repo_id
-    auth.check_repo_permission(token.user_id, repo_id)
+    auth.check_repo_permission(token.user_id, review.repo_id)
     match review.status:
-        case CommitReviewStatus.PENDING:
+        case ReviewStatus.PENDING:
             raise PendingReview
-        case CommitReviewStatus.FAILED:
+        case ReviewStatus.FAILED:
             raise FailedReview
-        case CommitReviewStatus.COMPLETED:
+        case ReviewStatus.COMPLETED:
             return review
 
 
@@ -72,16 +73,20 @@ def apply_commit_suggestions(token: Token, commit_id: str):
     raise NotImplementedError   # TODO
 
 
+def record_webhook_received(data: str):
+    db.record_webhook_received(data)
+
+
 def _create_pending_review(repo_id: int, before: str, after: str) -> CommitReview:
     return db.create_review(repo_id, before, after)
 
 
 def _finish_review(review: CommitReview, review_json: str):
-    db.update_review(review, CommitReviewStatus.COMPLETED, review_json)
+    db.update_review(review, ReviewStatus.COMPLETED, review_json)
 
 
 def _fail_review(review: CommitReview):
-    db.update_review(review, CommitReviewStatus.FAILED)
+    db.update_review(review, ReviewStatus.FAILED)
 
 
 def _verify_review_json_validity(review_json: str):
