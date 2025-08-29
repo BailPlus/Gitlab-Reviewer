@@ -1,7 +1,7 @@
 from unittest import TestCase
 from pprint import pprint
 from app.db.analysis import *
-from app.service.repositories import get_repo_by_id
+from app.service.repositories import _get_repo_by_id
 
 REPO_ID = 1
 
@@ -25,7 +25,7 @@ class TestSqlRepoAnalysisGetter(TestCase):
         pprint(res)
         for i in res:
             self.assertIsInstance(i, int)
-        self.assertEqual(get_repo_by_id(repo_id=REPO_ID).analysis_id, res[0])
+        self.assertEqual(_get_repo_by_id(repo_id=REPO_ID).analysis_id, res[0])
 
     # @classmethod
     # def tearDownClass(cls) -> None:

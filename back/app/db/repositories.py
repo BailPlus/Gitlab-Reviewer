@@ -46,7 +46,8 @@ def bind_repo_with_user(repo_id: int, user_id: int):
         session.commit()
 
 
-def unbind(user_id: int, repo_id: int):
+def unbind(user_id: int, repo_id: int) -> bool:
+    """返回值：仓库绑定计数是否为0"""
     with get_session() as session:
         bind = session.exec(
             select(RepositoryBinding)
@@ -65,6 +66,9 @@ def unbind(user_id: int, repo_id: int):
         ).all()
         if not remain_binds:
             repo = session.get(Repository, repo_id)
-            if repo is not None:
-                session.delete(repo)
-                session.commit()
+            assert repo is not None
+            session.delete(repo)
+            session.commit()
+            return True
+        else:
+            return False

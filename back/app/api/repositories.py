@@ -40,7 +40,7 @@ async def delete_repository(
     """解绑仓库"""
     token = get_token_from_cookie(request)
     unbind_repo(
-        user_id=token.user.id,
+        token=token,
         repo_id=repo_id
     )
     return EmptyOutput()

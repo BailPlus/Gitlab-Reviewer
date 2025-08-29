@@ -30,3 +30,4 @@ class Repository(TimestampMixin, SQLModel, table=True):
             single_parent=True
         )
     )
+    webhook_id: int = Field(description='webhook id')

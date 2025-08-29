@@ -67,10 +67,10 @@ def generate_commit_review(gl: Gitlab, project_id: int, before_sha: str, after_s
     messages = [{"role": "user", "content": commit_review_prompt.format(project_id=project_id, diff=diff)}]
     return function_call(messages, gl)
 
-def generate_mr_review(gl: Gitlab, project_id: int, mr_iid: int) -> str:
+def generate_mr_review(gl: Gitlab, project_id: int, mr_iid: int, pipeline_result: dict) -> str:
     """
-    为 GitLab 仓库中的提交差异生成详细审查。
+    为 GitLab 仓库中的 Merge Request 差异生成详细审查。
     """
     diff = get_mr_compare(gl, project_id, mr_iid)
-    messages = [{"role": "user", "content": commit_review_prompt.format(project_id=project_id, diff=diff)}]
+    messages = [{"role": "user", "content": mr_review_prompt.format(project_id=project_id, diff=diff, pipeline_result=pipeline_result)}]
     return function_call(messages, gl)

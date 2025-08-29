@@ -3,19 +3,53 @@ from ..db import merge_requests as db
 from ..model import ReviewStatus
 from ..model.tokens import Token
 from ..model.mr_reviews import MrReview
-from ..service import auth, notifications
+from . import auth, notifications
 from ..openai import openai
 from ..errors.review import *
-import json, logging
+import json, logging, io
 
 __all__ = [
-    "review_merge_request",
+    "handle_pipeline_event",
     "get_mr_review",
 ]
+JOBS = {    # job name -> files
+    'megalinter': ['megalinter-reports/copy-paste/html/jscpd-report.json'],
+    'semgrep': ['semgrep.json'],
+}
 
 
-def review_merge_request(repo_id: int, mr_iid: int):
-    Thread(target=_review_thread, args=(repo_id, mr_iid)).start()
+def handle_pipeline_event(data: dict):
+    """从流水线中获取代码检查结果，并交给AI进行评析"""
+    logging.info("Handling pipeline event")
+
+    # 获取流水线信息
+    gl = auth.get_root_gitlab_obj()
+    project = gl.projects.get(data['project']['id'])
+    pipeline = project.pipelines.get(data['object_attributes']['id'])
+    if (merge_requests := project.mergerequests.list(pipeline_id=pipeline.id)):
+        mr_iid = merge_requests[0].iid
+    else:
+        return
+    jobs = pipeline.jobs.list()
+
+    # 处理流水线结果
+    job_results: dict[str, dict[str, str]] = {}
+    for job in jobs:
+        if job.name in JOBS:
+            logging.info(f"Handling job {job.name}")
+            job_results[job.name] = {}
+            for filename in JOBS[job.name]:
+                logging.info(f"Downloading file {filename}")
+                buffer = io.BytesIO()
+                try:
+                    job.artifacts(filename, stream=True, action=buffer.write)
+                except Exception as e:
+                    logging.error(f"Failed to download file {filename}: {e}")
+                else:
+                    job_results[job.name][filename] = buffer.getvalue().decode()
+
+    # 生成代码检查结果
+    Thread(target=_review_thread, args=(project.id, mr_iid, job_results)).start()
 
 
 def get_mr_review(token: Token, repo_id: int, merge_request_id: int) -> MrReview:
@@ -47,11 +81,11 @@ def _verify_review_json_validity(review_json: str):
     assert 'info' in review_dict and 'suggestion' in review_dict and 'level' in review_dict
 
 
-def _review_thread(repo_id: int, mr_iid: int):
+def _review_thread(repo_id: int, mr_iid: int, pipeline_result: dict):
     review = _create_pending_review(repo_id, mr_iid)
     gl = auth.get_root_gitlab_obj()
     try:
-        review_json = openai.generate_mr_review(gl, repo_id, mr_iid)
+        review_json = openai.generate_mr_review(gl, repo_id, mr_iid, pipeline_result)
         _verify_review_json_validity(review_json)
     except Exception as e:
         logging.error(f"Failed to generate commit review: {e}")

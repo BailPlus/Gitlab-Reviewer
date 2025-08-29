@@ -11,6 +11,7 @@ class SmtpEncryption(str, Enum):
 
 
 class Settings(BaseSettings):
+    self_url: str = ""   # XXX: 待适配其他模块
     database_url: str = ""
     secret_key: str = ""
     algorithm: str = "HS256"
