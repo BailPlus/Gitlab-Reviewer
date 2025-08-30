@@ -13,6 +13,7 @@ import time, gitlab.exceptions
 __all__ = [
     'get_token_from_callback_code',
     'verify_gitlab_token',
+    'get_root_gitlab_obj',
     'login',
     'logout',
     'get_token_from_cookie',
