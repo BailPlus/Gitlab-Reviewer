@@ -152,11 +152,12 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnaly
       setError(null);
       
       try {
+        // 无论是MR还是提交，review字段都是JSON字符串，需要解析
         const reviewData = JSON.parse(commitAnalysis.analysis.review);
         let resultContent = reviewData.info || '';
         
         // 如果有建议，添加建议部分
-        if (reviewData.suggestion && typeof reviewData.suggestion === 'object') {
+        if (reviewData.suggestion && typeof reviewData.suggestion === 'object' && Object.keys(reviewData.suggestion).length > 0) {
           resultContent += '\n\n## 修改建议\n\n';
           Object.entries(reviewData.suggestion).forEach(([filePath, content]) => {
             // 检测文件扩展名来确定代码语言
@@ -232,7 +233,7 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnaly
         
         setResult(resultContent);
       } catch (parseError) {
-        console.error('解析提交分析数据失败:', parseError);
+        console.error('解析分析数据失败:', parseError);
         setError('解析分析数据失败');
       }
     }
@@ -414,11 +415,27 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnaly
           {isCommitAnalysis ? (
             <>
               <h1 className={styles.projectName}>
-                提交分析: {commitAnalysis?.commitTitle}
+                {commitAnalysis?.isMergeRequest 
+                  ? `Merge Request: ${commitAnalysis?.commitTitle}`
+                  : `提交分析: ${commitAnalysis?.commitTitle}`
+                }
               </h1>
               <p className={styles.projectDescription}>
-                提交ID: {commitAnalysis?.commitId} | 作者: {commitAnalysis?.author} | 
-                时间: {commitAnalysis?.createdAt ? new Date(commitAnalysis.createdAt).toLocaleString('zh-CN') : ''}
+                {commitAnalysis?.isMergeRequest ? (
+                  <>
+                    MR !{commitAnalysis?.mergeRequestIid} | 
+                    {commitAnalysis?.sourceBranch} → {commitAnalysis?.targetBranch} | 
+                    状态: {commitAnalysis?.mergeRequestState === 'opened' ? '进行中' : 
+                           commitAnalysis?.mergeRequestState === 'merged' ? '已合并' : '已关闭'} | 
+                    作者: {commitAnalysis?.author} | 
+                    时间: {commitAnalysis?.createdAt ? new Date(commitAnalysis.createdAt).toLocaleString('zh-CN') : ''}
+                  </>
+                ) : (
+                  <>
+                    提交ID: {commitAnalysis?.commitId} | 作者: {commitAnalysis?.author} | 
+                    时间: {commitAnalysis?.createdAt ? new Date(commitAnalysis.createdAt).toLocaleString('zh-CN') : ''}
+                  </>
+                )}
                 {commitAnalysis?.analysis?.level !== undefined && (
                   <span className={styles.levelIndicator}>
                     {' | 级别: '}

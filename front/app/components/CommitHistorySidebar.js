@@ -7,6 +7,8 @@ import styles from '../page.module.css';
 const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
   const [pushEvents, setPushEvents] = useState([]);
   const [commitsData, setCommitsData] = useState({});
+  const [mergeRequests, setMergeRequests] = useState([]);
+  const [mergeRequestReviews, setMergeRequestReviews] = useState({});
   const [loading, setLoading] = useState(false);
   const [expandedPushes, setExpandedPushes] = useState(new Set());
   const [branches, setBranches] = useState([]);
@@ -32,21 +34,41 @@ const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
     }
   };
 
+  // 获取Merge Request列表
+  const fetchMergeRequests = async () => {
+    try {
+      const mrs = await gitlabService.getMergeRequests(project.id, { 
+        state: 'all', 
+        per_page: 20,
+        order_by: 'created_at',
+        sort: 'desc'
+      });
+      setMergeRequests(mrs);
+    } catch (error) {
+      console.error('获取Merge Request列表失败:', error);
+    }
+  };
+
   // 获取push事件
   useEffect(() => {
     if (project?.id) {
       // 切换仓库时重置状态
       setPushEvents([]);
       setCommitsData({});
+      setMergeRequests([]);
+      setMergeRequestReviews({});
       setExpandedPushes(new Set());
       setBranches([]);
       setSelectedBranch('');
       
       fetchBranches();
+      fetchMergeRequests();
     } else {
       // 如果没有项目，清空状态
       setPushEvents([]);
       setCommitsData({});
+      setMergeRequests([]);
+      setMergeRequestReviews({});
       setExpandedPushes(new Set());
       setBranches([]);
       setSelectedBranch('');
@@ -137,6 +159,45 @@ const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
     return message.split('\n')[0]; // 只显示第一行
   };
 
+  // 合并推送事件和MR，按时间排序
+  const getCombinedTimeline = () => {
+    const timeline = [];
+    
+    // 添加推送事件
+    pushEvents.forEach(pushEvent => {
+      timeline.push({
+        type: 'push',
+        id: `push-${pushEvent.id}`,
+        data: pushEvent,
+        createdAt: new Date(pushEvent.created_at)
+      });
+    });
+    
+    // 添加Merge Request
+    mergeRequests.forEach(mr => {
+      timeline.push({
+        type: 'merge_request',
+        id: `mr-${mr.iid}`,
+        data: mr,
+        createdAt: new Date(mr.created_at)
+      });
+    });
+    
+    // 按时间倒序排序
+    return timeline.sort((a, b) => b.createdAt - a.createdAt);
+  };
+
+  // 获取MR状态颜色
+  const getMergeRequestStatusColor = (state) => {
+    // 根据MR状态设置颜色
+    switch (state) {
+      case 'opened': return '#28a745';
+      case 'merged': return '#6f42c1';
+      case 'closed': return '#6c757d';
+      default: return '#6c757d';
+    }
+  };
+
   // 处理点击 push 事件，获取提交分析
   const handlePushEventClick = async (pushEvent) => {
     if (!onCommitAnalysisClick) return;
@@ -159,6 +220,35 @@ const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
       }
     } catch (error) {
       console.error('获取提交分析失败:', error);
+    }
+  };
+
+  // 处理点击 Merge Request，获取并显示MR评估
+  const handleMergeRequestClick = async (mr) => {
+    if (!onCommitAnalysisClick) return;
+    
+    try {
+      const response = await backendService.mergeRequests.getMergeRequestReview(project.id, mr.iid);
+      
+      if (response.status === 0) {
+        // 传递分析数据给父组件
+        onCommitAnalysisClick({
+          commitId: `mr-${mr.iid}`,
+          commitTitle: mr.title,
+          author: mr.author.name,
+          createdAt: mr.created_at,
+          analysis: response.data,
+          isMergeRequest: true,
+          mergeRequestIid: mr.iid,
+          sourceBranch: mr.source_branch,
+          targetBranch: mr.target_branch,
+          mergeRequestState: mr.state
+        });
+      } else {
+        console.error('获取MR分析失败:', response.info);
+      }
+    } catch (error) {
+      console.error('获取MR分析失败:', error);
     }
   };
 
@@ -193,65 +283,108 @@ const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
       )}
       
       <div className={styles.commitSidebarContent}>
-        {pushEvents.length === 0 && !loading && (
+        {getCombinedTimeline().length === 0 && !loading && (
           <div className={styles.emptyState}>
             <p>暂无提交记录</p>
           </div>
         )}
         
-        {pushEvents.map((pushEvent) => (
-          <div key={pushEvent.id} className={styles.pushEventItem}>
-            <div 
-              className={styles.pushEventHeader}
-              onClick={() => handlePushEventClick(pushEvent)}
-            >
-              <div className={styles.pushEventInfo}>
-                <div className={styles.pushEventTitle}>
-                  <span 
-                    className={styles.expandIcon}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePushExpanded(pushEvent.id);
-                    }}
-                  >
-                    {expandedPushes.has(pushEvent.id) ? '▼' : '▶'}
-                  </span>
-                  <strong>{pushEvent.push_data.commit_title}</strong>
-                </div>
-                <div className={styles.pushEventMeta}>
-                  <span className={styles.author}>{pushEvent.author.name}</span>
-                  <span className={styles.pushDate}>{formatDate(pushEvent.created_at)}</span>
-                  <span className={styles.branch}>{pushEvent.push_data.ref}</span>
-                </div>
-              </div>
-              <div className={styles.commitCount}>
-                {pushEvent.push_data.commit_count} 个提交
-              </div>
-            </div>
-            
-            {expandedPushes.has(pushEvent.id) && commitsData[pushEvent.id] && (
-              <div className={styles.commitsContainer}>
-                {commitsData[pushEvent.id].map((commit) => (
-                  <div key={commit.id} className={styles.commitItem}>
-                    <div className={styles.commitHash}>
-                      {commit.short_id}
+        {getCombinedTimeline().map((item) => {
+          if (item.type === 'push') {
+            const pushEvent = item.data;
+            return (
+              <div key={item.id} className={styles.pushEventItem}>
+                <div 
+                  className={styles.pushEventHeader}
+                  onClick={() => handlePushEventClick(pushEvent)}
+                >
+                  <div className={styles.pushEventInfo}>
+                    <div className={styles.pushEventTitle}>
+                      <span 
+                        className={styles.expandIcon}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePushExpanded(pushEvent.id);
+                        }}
+                      >
+                        {expandedPushes.has(pushEvent.id) ? '▼' : '▶'}
+                      </span>
+                      <strong>{pushEvent.push_data.commit_title}</strong>
                     </div>
-                    <div className={styles.commitDetails}>
-                      <div className={styles.commitSingleLine}>
-                        <span className={styles.commitMessage}>
-                          {formatCommitMessage(commit.message)}
-                        </span>
-                        <span className={styles.commitAuthor}>
-                          {commit.author_name}
-                        </span>
-                      </div>
+                    <div className={styles.pushEventMeta}>
+                      <span className={styles.author}>{pushEvent.author.name}</span>
+                      <span className={styles.pushDate}>{formatDate(pushEvent.created_at)}</span>
+                      <span className={styles.branch}>{pushEvent.push_data.ref}</span>
                     </div>
                   </div>
-                ))}
+                  <div className={styles.commitCount}>
+                    {pushEvent.push_data.commit_count} 个提交
+                  </div>
+                </div>
+                
+                {expandedPushes.has(pushEvent.id) && commitsData[pushEvent.id] && (
+                  <div className={styles.commitsContainer}>
+                    {commitsData[pushEvent.id].map((commit) => (
+                      <div key={commit.id} className={styles.commitItem}>
+                        <div className={styles.commitHash}>
+                          {commit.short_id}
+                        </div>
+                        <div className={styles.commitDetails}>
+                          <div className={styles.commitSingleLine}>
+                            <span className={styles.commitMessage}>
+                              {formatCommitMessage(commit.message)}
+                            </span>
+                            <span className={styles.commitAuthor}>
+                              {commit.author_name}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        ))}
+            );
+          } else if (item.type === 'merge_request') {
+            const mr = item.data;
+            const statusColor = getMergeRequestStatusColor(mr.state);
+            
+            return (
+              <div key={item.id} className={styles.pushEventItem}>
+                <div 
+                  className={styles.pushEventHeader}
+                  onClick={() => handleMergeRequestClick(mr)}
+                >
+                  <div className={styles.pushEventInfo}>
+                    <div className={styles.pushEventTitle}>
+                      <span className={styles.mergeRequestIcon}>📝</span>
+                      <strong>{mr.title}</strong>
+                    </div>
+                    <div className={styles.pushEventMeta}>
+                      <span className={styles.author}>{mr.author.name}</span>
+                      <span className={styles.pushDate}>{formatDate(mr.created_at)}</span>
+                      <span className={styles.mergeRequestBranch}>
+                        {mr.source_branch} → {mr.target_branch}
+                      </span>
+                      <span 
+                        className={styles.mergeRequestStatus}
+                        style={{ backgroundColor: statusColor }}
+                      >
+                        {mr.state === 'opened' ? '进行中' : 
+                         mr.state === 'merged' ? '已合并' : '已关闭'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className={styles.mergeRequestIid}>
+                    !{mr.iid}
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          
+          return null;
+        })}
       </div>
     </div>
   );

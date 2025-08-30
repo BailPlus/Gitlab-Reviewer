@@ -180,6 +180,13 @@ export const backendService = {
     // 获取提交分析
     getCommitReview: (commitId) => backendApi(`/api/commits/${commitId}/review`),
   },
+
+  // Merge Request 相关API
+  mergeRequests: {
+    // 获取MR评估
+    getMergeRequestReview: (repoId, mergeRequestIid) => 
+      backendApi(`/api/merge_requests/${repoId}/${mergeRequestIid}/review`),
+  },
 };
 
 // 工具函数

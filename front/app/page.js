@@ -38,6 +38,10 @@ export default function Home() {
 
   // 处理项目选择
   const handleProjectSelect = (project) => {
+    // 切换仓库时，重置提交分析状态
+    setShowCommitAnalysis(false);
+    setCommitAnalysis(null);
+    
     // 如果点击的是当前已选中的项目，先设为null再设回来，强制刷新
     if (selectedProject && selectedProject.id === project.id) {
       setSelectedProject(null);
