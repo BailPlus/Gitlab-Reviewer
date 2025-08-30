@@ -54,7 +54,7 @@ gitlab_client_id="xxxxxxxxxxxxx"
 gitlab_client_secret="gloas-xxxxxxxxxxxxxx"
 # 管理员访问令牌，用于在用户未登录的情况下，收到评审webhook时，获取任意项目的信息
 # 请以管理员身份登录gitlab后，在`个人设置`-`访问令牌`中新增一个令牌，
-# `选择范围`勾选`api`即可，并获取令牌，填写以下字段
+# `选择范围`勾选`api`即可，并获取令牌，填写以下字段（注意过期时间，及时更换）
 gitlab_root_private_token="glpat-xxxxxxxxxxxx"
 # gitlab防伪token，用于验证webhook请求，自己拟定。
 # 会在绑定仓库时自动向仓库添加webhook并配置该token
@@ -81,8 +81,16 @@ email_from="Sender Nickname"
 其中，
 
 - 获取`client_id`和`client_secret`的步骤为：
+  <img width="2505" height="1423" alt="image" src="https://github.com/user-attachments/assets/96879786-49e6-4a71-a048-bd174b2227f4" />
+  <img width="2505" height="1428" alt="image" src="https://github.com/user-attachments/assets/bbb80e8f-c308-40e7-89aa-bbe925489ba1" />
+
+  
 
 - 获取管理员令牌的步骤为：
+  <img width="2505" height="1423" alt="image" src="https://github.com/user-attachments/assets/763606ed-1d22-4832-b4c7-5f1c6fc26534" />
+  <img width="2505" height="1422" alt="image" src="https://github.com/user-attachments/assets/db173579-a3c7-46dc-90c3-a92828551f1a" />
+
+
 
 ### 使用方法
 
