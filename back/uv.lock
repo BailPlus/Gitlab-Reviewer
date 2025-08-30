@@ -26,35 +26,6 @@ wheels = [
 ]
 
 [[package]]
-name = "back"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "fastapi" },
-    { name = "httpx" },
-    { name = "jinja2" },
-    { name = "openai" },
-    { name = "pydantic-settings" },
-    { name = "pymysql" },
-    { name = "python-gitlab" },
-    { name = "sqlmodel" },
-    { name = "uvicorn" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi", specifier = ">=0.115.14" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "jinja2", specifier = ">=3.1.6" },
-    { name = "openai", specifier = ">=1.93.0" },
-    { name = "pydantic-settings", specifier = ">=2.10.1" },
-    { name = "pymysql", specifier = ">=1.1.1" },
-    { name = "python-gitlab", specifier = ">=6.1.0" },
-    { name = "sqlmodel", specifier = ">=0.0.24" },
-    { name = "uvicorn", specifier = ">=0.35.0" },
-]
-
-[[package]]
 name = "certifi"
 version = "2025.6.15"
 source = { registry = "https://pypi.org/simple" }
@@ -140,6 +111,35 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ca/53/8c38a874844a8b0fa10dd8adf3836ac154082cf88d3f22b544e9ceea0a15/fastapi-0.115.14.tar.gz", hash = "sha256:b1de15cdc1c499a4da47914db35d0e4ef8f1ce62b624e94e0e5824421df99739", size = 296263, upload-time = "2025-06-26T15:29:08.21Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/53/50/b1222562c6d270fea83e9c9075b8e8600b8479150a18e4516a6138b980d1/fastapi-0.115.14-py3-none-any.whl", hash = "sha256:6c0c8bf9420bd58f565e585036d971872472b4f7d3f6c73b698e10cffdefb3ca", size = 95514, upload-time = "2025-06-26T15:29:06.49Z" },
+]
+
+[[package]]
+name = "gitlab-reviewer-backend"
+version = "1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "jinja2" },
+    { name = "openai" },
+    { name = "pydantic-settings" },
+    { name = "pymysql" },
+    { name = "python-gitlab" },
+    { name = "sqlmodel" },
+    { name = "uvicorn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi", specifier = ">=0.115.14" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "jinja2", specifier = ">=3.1.6" },
+    { name = "openai", specifier = ">=1.93.0" },
+    { name = "pydantic-settings", specifier = ">=2.10.1" },
+    { name = "pymysql", specifier = ">=1.1.1" },
+    { name = "python-gitlab", specifier = ">=6.1.0" },
+    { name = "sqlmodel", specifier = ">=0.0.24" },
+    { name = "uvicorn", specifier = ">=0.35.0" },
 ]
 
 [[package]]

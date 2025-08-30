@@ -10,7 +10,7 @@ import uvicorn, os, openai as real_openai, httpx, json
 
 # os.environ['http_proxy'] = '127.0.0.1:9910'
 # os.environ['https_proxy'] = '127.0.0.1:9910'
-real_openai.http_client = httpx.Client(proxy='http://127.0.0.1:9910')
+# real_openai.http_client = httpx.Client(proxy='http://127.0.0.1:9910')
 
 def mock_openai_generate_repo_analysis(gl, project_id, ref):
     return f'正在模拟对仓库ID {project_id} 分支 {ref} 的分析结果'
@@ -24,7 +24,7 @@ def mock_openai_generate_commit_review(gl, project_id, before_sha, after_sha):
     }, ensure_ascii=False)
 openai.generate_commit_review = mock_openai_generate_commit_review
 
-def mock_openai_generate_mr_review(gl, project_id, mr_iid):
+def mock_openai_generate_mr_review(gl, project_id, mr_iid, pipeline_result):
     return json.dumps({
         'info': f'正在模拟对仓库ID {project_id} 的 {mr_iid} 号合并请求的分析结果',
         'suggestion': {},

@@ -20,33 +20,39 @@ JOBS = {    # job name -> files
 
 def handle_pipeline_event(data: dict):
     """从流水线中获取代码检查结果，并交给AI进行评析"""
-    logging.info("Handling pipeline event")
+    logging.info("收到流水线事件")
 
     # 获取流水线信息
     gl = auth.get_root_gitlab_obj()
     project = gl.projects.get(data['project']['id'])
     pipeline = project.pipelines.get(data['object_attributes']['id'])
+    if pipeline.status not in ['success', 'failed']:
+        logging.info("跳过未完成的流水线")
+        return
+
     if (merge_requests := project.mergerequests.list(pipeline_id=pipeline.id)):
         mr_iid = merge_requests[0].iid
     else:
+        logging.warning("没有找到对应的merge request")
         return
     jobs = pipeline.jobs.list()
-
     # 处理流水线结果
     job_results: dict[str, dict[str, str]] = {}
-    for job in jobs:
-        if job.name in JOBS:
-            logging.info(f"Handling job {job.name}")
-            job_results[job.name] = {}
-            for filename in JOBS[job.name]:
-                logging.info(f"Downloading file {filename}")
-                buffer = io.BytesIO()
-                try:
-                    job.artifacts(filename, stream=True, action=buffer.write)
-                except Exception as e:
-                    logging.error(f"Failed to download file {filename}: {e}")
-                else:
-                    job_results[job.name][filename] = buffer.getvalue().decode()
+    for pipeline_job in jobs:
+        if pipeline_job.name not in JOBS:
+            logging.info(f'跳过未知的流水线任务：{pipeline_job.name}')
+            continue
+        logging.info(f"正在处理{pipeline_job.name}")
+        job = project.jobs.get(pipeline_job.id)
+        job_results[job.name] = {}
+        for filename in JOBS[job.name]:
+            logging.info(f"正在下载文件：{filename}")
+            try:
+                job_results[job.name][filename] = job.artifact(filename).decode()
+            except Exception as e:
+                logging.error(f"下载{filename}失败: {e}")
+    logging.debug("流水线处理结果：")
+    logging.debug(job_results)
 
     # 生成代码检查结果
     Thread(target=_review_thread, args=(project.id, mr_iid, job_results)).start()
