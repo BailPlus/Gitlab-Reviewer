@@ -1620,6 +1620,45 @@
   50% { opacity: 0.5; }
 }
 
+/* 分支选择器样式 */
+.branchSelector {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e1e4e8;
+  background: #f6f8fa;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.branchLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #24292e;
+  white-space: nowrap;
+}
+
+.branchSelect {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5da;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: white;
+  color: #24292e;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.branchSelect:focus {
+  outline: none;
+  border-color: #0366d6;
+}
+
+.branchSelect:disabled {
+  background: #f6f8fa;
+  cursor: not-allowed;
+}
+
 .commitSidebarContent {
   flex: 1;
   overflow-y: auto;

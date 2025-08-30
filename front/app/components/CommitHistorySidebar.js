@@ -9,6 +9,28 @@ const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
   const [commitsData, setCommitsData] = useState({});
   const [loading, setLoading] = useState(false);
   const [expandedPushes, setExpandedPushes] = useState(new Set());
+  const [branches, setBranches] = useState([]);
+  const [selectedBranch, setSelectedBranch] = useState('');
+  const [branchesLoading, setBranchesLoading] = useState(false);
+
+  // 获取分支列表
+  const fetchBranches = async () => {
+    setBranchesLoading(true);
+    try {
+      const branchList = await gitlabService.getProjectBranches(project.id, { per_page: 50 });
+      setBranches(branchList);
+      
+      // 默认选择默认分支或第一个分支
+      if (branchList.length > 0) {
+        const defaultBranch = branchList.find(branch => branch.default) || branchList[0];
+        setSelectedBranch(defaultBranch.name);
+      }
+    } catch (error) {
+      console.error('获取分支列表失败:', error);
+    } finally {
+      setBranchesLoading(false);
+    }
+  };
 
   // 获取push事件
   useEffect(() => {
@@ -17,26 +39,44 @@ const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
       setPushEvents([]);
       setCommitsData({});
       setExpandedPushes(new Set());
+      setBranches([]);
+      setSelectedBranch('');
       
-      fetchPushEvents();
+      fetchBranches();
     } else {
       // 如果没有项目，清空状态
       setPushEvents([]);
       setCommitsData({});
       setExpandedPushes(new Set());
+      setBranches([]);
+      setSelectedBranch('');
     }
   }, [project?.id]);
 
+  // 当选择的分支改变时，重新获取提交历史
+  useEffect(() => {
+    if (project?.id && selectedBranch) {
+      setPushEvents([]);
+      setCommitsData({});
+      setExpandedPushes(new Set());
+      fetchPushEvents();
+    }
+  }, [selectedBranch]);
+
   const fetchPushEvents = async () => {
+    if (!selectedBranch) return;
+    
     setLoading(true);
     try {
       const events = await gitlabService.getProjectEvents(project.id, { 
         action: 'pushed', 
-        per_page: 10 
+        per_page: 20 
       });
       
-      // 过滤出有push_data的事件
-      const validPushEvents = events.filter(event => event.push_data);
+      // 过滤出有push_data的事件，并且匹配选定的分支
+      const validPushEvents = events.filter(event => 
+        event.push_data && event.push_data.ref === selectedBranch
+      );
       setPushEvents(validPushEvents);
       
       // 为每个push事件获取commits
@@ -78,6 +118,10 @@ const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
       newExpanded.add(pushId);
     }
     setExpandedPushes(newExpanded);
+  };
+
+  const handleBranchChange = (branchName) => {
+    setSelectedBranch(branchName);
   };
 
   const formatDate = (dateString) => {
@@ -128,6 +172,25 @@ const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
         <h3>提交历史</h3>
         {loading && <span className={styles.loadingDot}>●</span>}
       </div>
+      
+      {/* 分支选择器 */}
+      {branches.length > 0 && (
+        <div className={styles.branchSelector}>
+          <label className={styles.branchLabel}>分支:</label>
+          <select 
+            value={selectedBranch}
+            onChange={(e) => handleBranchChange(e.target.value)}
+            className={styles.branchSelect}
+            disabled={branchesLoading}
+          >
+            {branches.map((branch) => (
+              <option key={branch.name} value={branch.name}>
+                {branch.name} {branch.default ? '(默认)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       
       <div className={styles.commitSidebarContent}>
         {pushEvents.length === 0 && !loading && (
