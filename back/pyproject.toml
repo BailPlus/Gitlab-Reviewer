@@ -1,7 +1,7 @@
 [project]
 name = "Gitlab_Reviewer_backend"
 version = "1.0"
-description = "使用人工智能对私有化gitlab中的仓库、提交、合并请求进行评审"
+description = "基于 AI 的 GitLab 自动代码评审系统。使用人工智能对私有化gitlab中的仓库、提交、合并请求进行评审"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

@@ -1,13 +1,8 @@
-from urllib.parse import urljoin
 from fastapi import APIRouter, Response, Request
 from fastapi.responses import RedirectResponse
 from ..schema import BaseOutput, auth as auth_models
 from ..core.config import settings
-from ..service.auth import (
-    login,
-    logout,
-    get_token_from_cookie
-)
+from ..service.auth import *
 
 router = APIRouter(prefix='/_/auth')
 
@@ -15,10 +10,11 @@ router = APIRouter(prefix='/_/auth')
 @router.get('/login')
 async def login_redirect_to_gitlab():
     """登录"""
+    print(OAUTH_REDIRECT_URL)
     return RedirectResponse(url=
         settings.gitlab_url
         + '/oauth/authorize?client_id=' + settings.gitlab_client_id
-        + '&redirect_uri=' + urljoin(settings.self_url, '/_/auth/callback')
+        + '&redirect_uri=' + OAUTH_REDIRECT_URL
         + '&response_type=code&scope=api'
     )
 

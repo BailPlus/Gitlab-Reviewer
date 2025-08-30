@@ -18,12 +18,14 @@ __all__ = [
     'login',
     'logout',
     'get_token_from_cookie',
-    'check_repo_permission'
+    'check_repo_permission',
+    'OAUTH_REDIRECT_URL',
 ]
-
+OAUTH_REDIRECT_URL = urljoin(settings.self_url, '/_/auth/callback')
 
 async def get_token_from_callback_code(code: str) -> GitlabToken:
     async with AsyncClient() as client:
+        print(OAUTH_REDIRECT_URL)
         token_resp = await client.post(
             settings.gitlab_url + "/oauth/token",
             data={
@@ -31,7 +33,7 @@ async def get_token_from_callback_code(code: str) -> GitlabToken:
                 "client_secret": settings.gitlab_client_secret,
                 "code": code,
                 "grant_type": "authorization_code",
-                "redirect_uri": urljoin(settings.self_url, '/_/auth/callback')
+                "redirect_uri": OAUTH_REDIRECT_URL
             }
         )
     if token_resp.status_code != 200:
@@ -84,25 +86,17 @@ async def login(code: str) -> Token:
     return token_obj
 
 
-def delete_token_from_db(token: Token) -> None:
-    db.delete_token(token)
-
-
 def logout(token: Token):
-    delete_token_from_db(token)
-
-
-def get_token_obj_from_db(token: str) -> Token:
-    return db.get_token_obj(token)
+    _delete_token_from_db(token)
 
 
 def get_token_from_cookie(request: Request) -> Token:
     token_str = request.cookies.get('token')
     if token_str is None:
         raise InvalidGitlabToken(info='未登录')
-    token = get_token_obj_from_db(token_str)
+    token = _get_token_obj_from_db(token_str)
     if token.is_expired:
-        delete_token_from_db(token)
+        _delete_token_from_db(token)
         raise InvalidGitlabToken(info='登录已过期')
     return token
 
@@ -115,3 +109,11 @@ def check_repo_permission(user_id: int, repo_id: int):
             break
     else:
         raise PermissionDenied
+
+
+def _delete_token_from_db(token: Token) -> None:
+    db.delete_token(token)
+
+
+def _get_token_obj_from_db(token: str) -> Token:
+    return db.get_token_obj(token)
