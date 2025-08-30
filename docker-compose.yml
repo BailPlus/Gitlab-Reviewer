@@ -1,0 +1,75 @@
+# `docker-compose.yml`
+version: "3.9"
+services:
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        # 后端地址，使用此 Docker Compose 文件时，默认为 http://back:8000
+        NEXT_PUBLIC_API_BASE_URL: "http://back:8000"
+        # GitLab 地址，替换为你的 GitLab 实例地址
+        NEXT_PUBLIC_GITLAB_BASE_URL: "https://gitlab.example.com"
+    environment:
+      NODE_ENV: "production"
+      NEXT_TELEMETRY_DISABLED: 1
+      PORT: 3000
+      # 后端地址，使用此 Docker Compose 文件时，默认为 http://back:8000
+      NEXT_PUBLIC_API_BASE_URL: "http://back:8000"
+      # GitLab 地址，替换为你的 GitLab 实例地址
+      NEXT_PUBLIC_GITLAB_BASE_URL: "https://gitlab.example.com"
+    ports:
+      # 左侧为宿主机端口，右侧为容器端口
+      - "3000:3000"
+    depends_on:
+      - back
+
+  back:
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    environment:
+      PORT: 8000
+      # Gitlab Reviewer部署URL
+      GLRV_self_url: "https://gr.example.com/"
+
+      # 数据库相关配置
+      # 数据库URL，可换用其他数据库，但要先安装响应的库
+      GLRV_database_url: "mysql+pymysql://gitlab_reviewer:password@mysql.server:3306/gitlab_reviewer"
+
+      # Gitlab相关配置
+      # Gitlab URL
+      GLRV_gitlab_url: "https://gitlab.example.com/"
+      # 请以管理员身份登录gitlab后，在`管理面板`-`应用`中新增一个应用,
+      # `scope`勾选`api`即可，`Redirect URI`填写`{self_url}/_/auth/callback`
+      # 并获取client_id和client_secret，填写以下2个字段
+      GLRV_gitlab_client_id: "xxxxxxxxxxxxx"
+      GLRV_gitlab_client_secret: "gloas-xxxxxxxxxxxxxx"
+      # 管理员访问令牌，用于在用户未登录的情况下，收到评审webhook时，获取任意项目的信息
+      # 请以管理员身份登录gitlab后，在`个人设置`-`访问令牌`中新增一个令牌，
+      # `选择范围`勾选`api`即可，并获取令牌，填写以下字段
+      GLRV_gitlab_root_private_token: "glpat-xxxxxxxxxxxx"
+      # gitlab防伪token，用于验证webhook请求，自己拟定。
+      # 会在绑定仓库时自动向仓库添加webhook并配置该token
+      GLRV_gitlab_webhook_token: "xxxxxxxxxxxx"
+
+      # 大模型相关配置。不必是ChaptGPT，只要是支持ChatCompletion接口的模型即可
+      GLRV_openai_base_url: "https://api.openai.com/v1"
+      GLRV_openai_api_key: "sk-xxxxxxxxxxxxx"
+      GLRV_openai_model: "gpt-3.5-turbo"
+
+      # 邮件配置
+      # 是否启用邮件通知。如果填`false`，则下面的其他字段都可以不填
+      GLRV_enable_email: "true"
+      GLRV_smtp_host: "smtp.example.com"
+      GLRV_smtp_port: "465"
+      GLRV_smtp_username: "user@example.com"
+      GLRV_smtp_password: "smtp_password"
+      # smtp加密方式，可选值：`none`,`ssl`,`starttls`
+      GLRV_smtp_encryption: "ssl"
+      # 发件人昵称
+      GLRV_email_from: "Sender Nickname"
+
+    ports:
+      - "8000:8000"
+
