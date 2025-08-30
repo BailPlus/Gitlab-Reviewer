@@ -9,11 +9,7 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "secure.gravatar.com",
-      },
-      {
-        protocol: "https",
-        hostname: "gitlab.bail.asia",
-      },
+      }
     ],
   },
   turbopack: {
@@ -29,10 +25,6 @@ const nextConfig = {
     const backendBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
     
     return [
-      {
-        source: '/api/v4/:path*',
-        destination: `${process.env.NEXT_PUBLIC_GITLAB_BASE_URL}/api/v4/:path*`,
-      },
       {
         source: '/api/:path*',
         destination: `${backendBaseUrl}/api/:path*`,
