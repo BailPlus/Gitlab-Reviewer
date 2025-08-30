@@ -1,34 +1,32 @@
 from threading import Thread
+from typing import Optional
 from gitlab import Gitlab
+from ..model import ReviewStatus
 from ..model.tokens import Token
 from ..model.repository_analyses import RepositoryAnalysis
 from ..db import analysis as db
-from ..errors.analysis import *
-from ..openai.openai import generate_repo_analysis
+from ..errors.review import *
+from ..openai import openai
 from . import auth
+import traceback
 
 __all__ = [
     "analyze",
     "get_analysis",
     "get_analysis_history",
-    "score_repo",
     "get_score",
 ]
 
 
-def analyze(token: Token, repo_id: int):
+def analyze(token: Token, repo_id: int, branch: Optional[str] = None):
     """进行分析"""
     auth.check_repo_permission(token.user_id, repo_id)
-    gl = auth.verify_gitlab_token(token.token)
-    branch =  _get_default_branch(gl, repo_id)
+    gl = auth.get_root_gitlab_obj()
+    if branch is None:
+        branch = _get_default_branch(gl, repo_id)
+    _create_analysis(repo_id)
     Thread(target=_analyze_thread, args=(gl, repo_id, branch)).start()  # XXX: 线程不安全
-
-
-def score_repo(token: Token, repo_id: int, branch: str):
-    """获取仓库分数"""
-    auth.check_repo_permission(token.user.id, repo_id)
-    gl = auth.verify_gitlab_token(token.token)
-    Thread(target=_score_thread, args=(gl, repo_id, branch)).start()  # XXX: 线程不安全
+    Thread(target=_score_thread, args=(gl, repo_id, branch)).start()    # XXX: 线程不安全
 
 
 def get_analysis(token: Token, analysis_id: int) -> RepositoryAnalysis:
@@ -36,12 +34,12 @@ def get_analysis(token: Token, analysis_id: int) -> RepositoryAnalysis:
     analysis = db.get_analysis(analysis_id)
     auth.check_repo_permission(token.user.id, analysis.repo_id)
     match analysis.status:
-        case db.AnalysisStatus.COMPLETED:
+        case ReviewStatus.COMPLETED:
             return analysis
-        case db.AnalysisStatus.PENDING:
-            raise PendingAnalysis
-        case db.AnalysisStatus.FAILED:
-            raise FailedAnalysis
+        case ReviewStatus.PENDING:
+            raise PendingReview
+        case ReviewStatus.FAILED:
+            raise FailedReview
 
 
 def get_analysis_history(token: Token, repo_id: int) -> list[int]:
@@ -56,23 +54,28 @@ def get_score(token: Token, repo_id: int):
     return db.get_score(repo_id)
 
 
+def _create_analysis(repo_id: int) -> RepositoryAnalysis:
+    return db.create_analysis(repo_id)
+
+
 def _analyze_thread(gl: Gitlab, repo_id: int, branch: str):
     """进行分析的线程"""
     try:
-        analysis_json = generate_repo_analysis(gl, repo_id, branch)
+        analysis_json = openai.generate_repo_analysis(gl, repo_id, branch)
     except Exception:
         db.fail_analysis(repo_id)   # XXX: 需要给出错误信息
+        traceback.print_exc()   # XXX: 建议改为log
     else:
         db.update_analysis(repo_id, analysis_json)
 
 
 def _score_thread(gl: Gitlab, repo_id: int, branch: str):
-    raise NotImplementedError   # TODO
     try:
-        score = NotImplemented
+        ##raise NotImplementedError   # TODO
+        score = -1
     except Exception:
         db.fail_analysis(repo_id)
-        db.save_score(-1)
+        db.save_score(repo_id, -1)
     else:
         db.save_score(repo_id, score)
 

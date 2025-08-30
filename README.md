@@ -98,7 +98,7 @@
   Cookie: token=...
   
   {
-    "repo_name": "user1/repo1"
+    "repo_id": 1
   }
   ```
   ```json
@@ -223,7 +223,11 @@
   }
   ```
   ```json
-  ???
+  {
+    "status": 0,
+    "info": "ok",
+    "data": {}
+  }
   ```
   - 获取提交的 AI 评审结果
   ```http
@@ -240,7 +244,6 @@
     }
   }
   ```
-  - PUT /api/commits/{commit_id}/review - 更新评审状态
   - 一键应用修改建议
   ```http
   POST /api/commits/{commit_id}/apply-suggestions
@@ -264,14 +267,14 @@
     "status": 0,
     "info": "ok",
     "data": {
-      "notifications": {
+      "notify_level": 1,
       "email": {
         "enabled": true,
-        "address": "user@example.com"
       },
-      "telegram": {
+      "webhook": {
         "enabled": true,
-        "chat_id": "string"
+        "url": "https://example.com/webhook",
+        "secret": "..."
       }
     }
   }
@@ -282,15 +285,14 @@
   Cookie: token=...
   
   {
-    "notifications": {
-      "email": {
-        "enabled": true,
-        "address": "user@example.com"
-      },
-      "telegram": {
-        "enabled": true,
-        "chat_id": "string"
-      }
+    "notify_level": 1,
+    "email": {
+      "enabled": true,
+    },
+    "webhook": {
+      "enabled": true,
+      "url": "https://example.com/webhook",
+      "secret": "..."
     }
   }
   ```
@@ -299,15 +301,14 @@
     "status": 0,
     "info": "ok",
     "data": {
-        "notifications": {
-        "email": {
-          "enabled": true,
-          "address": "user@example.com"
-        },
-        "telegram": {
-          "enabled": true,
-          "chat_id": "string"
-        }
+      "notify_level": 1,
+      "email": {
+        "enabled": true,
+      },
+      "webhook": {
+        "enabled": true,
+        "url": "https://example.com/webhook",
+        "secret": "..."
       }
     }
   }
@@ -326,6 +327,22 @@
   }
   ```
 
+- Merge Request 评审相关
+  - 获取 Merge Request 评审结果
+  ```http
+  GET /api/merge_requests/{merge_request_id}/review
+  Cookie: token=...
+  ```
+  ```json
+  {
+    "status": 0,
+    "info": "ok",
+    "data": {
+      "review": "Merge Request 评审结果",
+      "created_at": 17xxxxxxxx
+    }
+  }
+  ```
 
 ## 后端
 
@@ -448,16 +465,38 @@ uv run run.py
 
 #### `notification_settings` 表
 
-| 列名                 | 类型              | 可否为空 | 键       | 默认值                | 额外                           |
-| ------------------ | --------------- | ---- | ------- | ------------------ | ---------------------------- |
-| id                 | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT              |
-| user\_id           | BIGINT UNSIGNED | NO   | UNI(FK) |                    |                              |
-| via\_email         | TINYINT(1)      | NO   |         | 1                  |                              |
-| email\_address     | VARCHAR(100)    | YES  |         |                    |                              |
-| via\_telegram      | TINYINT(1)      | NO   |         | 0                  |                              |
-| telegram\_chat\_id | VARCHAR(100)    | YES  |         |                    |                              |
-| created\_at        | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                              |
-| updated\_at        | DATETIME        | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
+| 列名            | 类型              | 可否为空 | 键       | 默认值                | 额外                           |
+| ---------------- | --------------- | ---- | ------- | ------------------ | ---------------------------- |
+| id               | BIGINT UNSIGNED | NO   | PRI     |                    | AUTO\_INCREMENT              |
+| user\_id         | BIGINT UNSIGNED | NO   | UNI(FK) |                    |                              |
+| notify\_level    | INTEGER ∈ [0,3] | NO   |         | 0                  |                              |
+| email\_enabled   | TINYINT(1)      | NO   |         | 0                  |                              |
+| webhook\_enabled | TINYINT(1)      | NO   |         | 0                  |                              |
+| webhook\_url     | VARCHAR(100)    | YES  |         | NULL               |                              |
+| webhook\_secret  | VARCHAR(100)    | YES  |         | NULL               |                              |
+| created\_at      | DATETIME        | NO   |         | CURRENT\_TIMESTAMP |                              |
+| updated\_at      | DATETIME        | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
+
+#### `mr_reviews` 表
+
+| 列名           | 类型                                    | 可否为空 | 键       | 默认值               | 额外                           |
+| ------------ | ------------------------------------- | ---- | ------- | ------------------ | ---------------------------- |
+| id           | BIGINT UNSIGNED                       | NO   | PRI     |                    | AUTO\_INCREMENT              |
+| repo\_id       | BIGINT UNSIGNED                     | NO   | MUL(FK) |                    |
+| mr\_iid        | BIGINT UNSIGNED                     | NO   |         |                    |         
+| review\_json | JSON                                  | NO   |         |                    |                              |
+| status       | ENUM('pending','completed','failed')  | NO   |         | pending            |                              |
+| created\_at  | DATETIME                              | NO   |         |                    |                              |
+| updated\_at  | DATETIME                              | NO   |         | CURRENT\_TIMESTAMP | ON UPDATE CURRENT\_TIMESTAMP |
+
+
+#### `webhook_logs` 表
+
+| 列名          | 类型              | 可否为空 | 键       | 默认值 | 额外              |
+| ------------ | --------------- | ---- | ------- | --- | --------------- |
+| id           | BIGINT UNSIGNED | NO   | PRI     |     | AUTO\_INCREMENT |
+| data         | TEXT            | NO   |         |     |                 |
+| created\_at  | DATETIME        | NO   |         |     |                 |
 
 ## 前端
 

@@ -1,4 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy.orm import relationship
 from . import TimestampMixin
 from .commit_reviews import CommitReview
 
@@ -10,13 +11,9 @@ class CommitReviewBinding(TimestampMixin, SQLModel, table=True):
     review_id: int = Field(foreign_key='commit_reviews.id', description='commit评审id')
     review: CommitReview = Relationship(
         cascade_delete=True,
-    )
-
-'''
         sa_relationship=relationship(
             'CommitReview',
             foreign_keys='CommitReviewBinding.review_id',
             uselist=False
         )
     )
-'''

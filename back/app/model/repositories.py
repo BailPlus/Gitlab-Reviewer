@@ -25,6 +25,9 @@ class Repository(TimestampMixin, SQLModel, table=True):
         sa_relationship=relationship(
             'RepositoryAnalysis',
             foreign_keys='Repository.analysis_id',
-            uselist=False
+            uselist=False,
+            cascade='all, delete',
+            single_parent=True
         )
     )
+    webhook_id: int = Field(description='webhook id')

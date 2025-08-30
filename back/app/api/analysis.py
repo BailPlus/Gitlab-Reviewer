@@ -6,14 +6,15 @@ from ..service.analysis import *
 router = APIRouter(prefix='/api/analysis')
 
 
-@router.post('/', response_model=EmptyOutput)
+@router.post('', response_model=EmptyOutput)
 async def post_analysis(
     request: Request,
     input_schema: analysis_models.PostAnalysisInput,
 ):
     token = get_token_from_cookie(request)
     repo_id = input_schema.repo_id
-    analyze(token, repo_id)
+    branch = input_schema.branch
+    analyze(token, repo_id, branch)
     return EmptyOutput()
 
 
@@ -29,7 +30,7 @@ async def get_analysis_history_route(
     ))
 
 
-@router.get('/{analysis_id}', response_model=analysis_models.GetAnalysisOutput)
+@router.get('/{analysis_id}', response_model=BaseOutput[analysis_models.GetAnalysisOutput])
 async def get_analysis_route(
     request: Request,
     analysis_id: int,
@@ -38,8 +39,8 @@ async def get_analysis_route(
     analysis_obj = get_analysis(token, analysis_id)
     score = get_score(token, analysis_obj.repo_id)
     assert analysis_obj.analysis_json is not None
-    return analysis_models.GetAnalysisOutput(
+    return BaseOutput(data=analysis_models.GetAnalysisOutput(
         analyze_time=int(analysis_obj.created_at.timestamp()),
         result=analysis_obj.analysis_json,
         score=score
-    )
+    ))

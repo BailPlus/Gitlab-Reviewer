@@ -91,6 +91,15 @@ def get_commit_compare(gl: gitlab.Gitlab, project_id, before_sha, after_sha):
     project = gl.projects.get(project_id)
     return project.repository_compare(before_sha, after_sha)
 
+def get_mr_compare(gl: gitlab.Gitlab, project_id: int, mr_iid: int):
+    """
+    获取merge request的差异信息。
+    参数:
+      - project_id: 项目 ID
+      - mr_iid: merge request 的内部 ID
+    """
+    return gl.projects.get(project_id).mergerequests.get(mr_iid).diffs.list()
+
 def get_branch(gl: gitlab.Gitlab, project_id, branch_name):
     """
     获取指定分支的详细信息，包括最新提交信息。

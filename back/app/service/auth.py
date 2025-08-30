@@ -7,7 +7,7 @@ from ..schema.auth import GitlabToken
 from ..model.tokens import Token
 from ..errors.auth import InvalidGitlabToken
 from ..db import auth as db
-from . import repositories
+from . import repositories, notifications
 import time, gitlab.exceptions
 
 __all__ = [
@@ -42,13 +42,21 @@ async def get_token_from_callback_code(code: str) -> GitlabToken:
 
 
 def verify_gitlab_token(token: str) -> Gitlab:
-    gl = Gitlab(settings.gitlab_url)
-    gl.oauth_token = token
-    gl._set_auth_info()
+    gl = Gitlab(settings.gitlab_url, oauth_token=token)
     try:
         gl.auth()
     except gitlab.exceptions.GitlabAuthenticationError as e:
         raise InvalidGitlabToken from e
+    return gl
+
+
+def get_root_gitlab_obj() -> Gitlab:
+    root_token = settings.gitlab_root_private_token
+    gl = Gitlab(settings.gitlab_url, private_token=root_token)
+    try:
+        gl.auth()
+    except gitlab.exceptions.GitlabAuthenticationError as e:
+        raise InvalidGitlabToken(info='gitlab root private token无效') from e
     return gl
 
 
@@ -64,7 +72,9 @@ async def login(code: str) -> Token:
     email = gl.user.email
 
     # 向数据库更新用户信息
-    db.save_userinfo(uid, username, email)
+    registered = db.save_userinfo(uid, username, email)
+    if not registered:
+        notifications.create_default_notification_settings(uid)
 
     # 保存token到数据库
     exp = int(time.time()) + gl_token.token_age

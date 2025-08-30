@@ -7,8 +7,8 @@ import time
 class Token(TimestampMixin, SQLModel, table=True):
     __tablename__ = "tokens" # type: ignore
     token: str = Field(primary_key=True, description="token")
-    user_id: int = Field(foreign_key="users.id", description="用户id")
-    user: User = Relationship(passive_deletes='all')
+    user_id: int = Field(foreign_key="users.id", description="用户id", ondelete="CASCADE")
+    user: User = Relationship()
     exp: int = Field(nullable=False, description="过期时间")
 
     @property
