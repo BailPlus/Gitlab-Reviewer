@@ -23,10 +23,11 @@ Gitlab-Reviewer 的主要功能是：
 
 ### 下载和安装
 
-1. 安装 `uv`
+1. 安装 `uv` 和 `node.js` 运行环境
 2. 将 `back/.env.example` 复制为 `.env` ，并填写相关字段（详见下文）
 3. 在 `back` 目录下执行 `uv run run.py` 即可启动后端服务。
-4. （前端）
+4. 在 `front` 目录下创建 `.env.local` 文件，并填写相关字段（详见下文）
+5. 在 `front` 目录下执行 `npm install` 和 `npm run dev` 启动前端服务。
 
 ### 容器化
 
@@ -34,8 +35,8 @@ Gitlab-Reviewer 的主要功能是：
 
 ### 配置说明
 
-在 `.env` 文件中配置以下关键参数：
-
+#### 后端配置说明
+配置文件：`back/.env`
 ```bash
 # Gitlab Reviewer部署URL
 self_url="https://gr.example.com/"
@@ -84,13 +85,20 @@ email_from="Sender Nickname"
   <img width="2505" height="1423" alt="image" src="https://github.com/user-attachments/assets/96879786-49e6-4a71-a048-bd174b2227f4" />
   <img width="2505" height="1428" alt="image" src="https://github.com/user-attachments/assets/bbb80e8f-c308-40e7-89aa-bbe925489ba1" />
 
-  
-
 - 获取管理员令牌的步骤为：
   <img width="2505" height="1423" alt="image" src="https://github.com/user-attachments/assets/763606ed-1d22-4832-b4c7-5f1c6fc26534" />
   <img width="2505" height="1422" alt="image" src="https://github.com/user-attachments/assets/db173579-a3c7-46dc-90c3-a92828551f1a" />
 
+另外，监听 ip 和端口默认为 `[::]:8000` ，可在 `back/run.py` 中修改
 
+#### 前端配置说明
+配置文件：`front/.env.local`
+```bash
+# 后端URL
+NEXT_PUBLIC_API_BASE_URL=http://back.gr.example.com/
+# Gitlab URL
+NEXT_PUBLIC_GITLAB_BASE_URL=https://gitlab.example.com/
+```
 
 ### 使用方法
 
