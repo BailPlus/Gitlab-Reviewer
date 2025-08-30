@@ -92,6 +92,13 @@ export default function Home() {
   const handleBackToRepositoryAnalysis = () => {
     setShowCommitAnalysis(false);
     setCommitAnalysis(null);
+    
+    // 强制刷新仓库分析 - 先清除项目再重新设置以触发重新渲染
+    const currentProject = selectedProject;
+    setSelectedProject(null);
+    setTimeout(() => {
+      setSelectedProject(currentProject);
+    }, 0);
   };
 
   return (

@@ -79,7 +79,50 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnaly
 
   // 初始化Mermaid
   useEffect(() => {
-    mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+    try {
+      mermaid.initialize({ 
+        startOnLoad: false,
+        securityLevel: 'loose',
+        theme: 'default',
+        themeVariables: {
+          primaryColor: '#0366d6',
+          primaryTextColor: '#24292e',
+          primaryBorderColor: '#e1e4e8',
+          lineColor: '#d1d5da',
+          secondaryColor: '#f6f8fa',
+          tertiaryColor: '#fafbfc'
+        },
+        flowchart: {
+          curve: 'basis',
+          padding: 20,
+          nodeSpacing: 50,
+          rankSpacing: 50
+        },
+        sequence: {
+          diagramMarginX: 50,
+          diagramMarginY: 10,
+          actorMargin: 50,
+          width: 150,
+          height: 65,
+          boxMargin: 10,
+          boxTextMargin: 5,
+          noteMargin: 10,
+          messageMargin: 35
+        },
+        gantt: {
+          titleTopMargin: 25,
+          barHeight: 20,
+          fontsize: 12,
+          sidePadding: 75,
+          leftPadding: 75,
+          gridLineStartPadding: 35,
+          fontSize: 11,
+          numberSectionStyles: 4
+        }
+      });
+    } catch (initError) {
+      console.error('Mermaid初始化失败:', initError);
+    }
   }, []);
 
   // 获取分析历史
@@ -116,7 +159,74 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnaly
         if (reviewData.suggestion && typeof reviewData.suggestion === 'object') {
           resultContent += '\n\n## 修改建议\n\n';
           Object.entries(reviewData.suggestion).forEach(([filePath, content]) => {
-            resultContent += `### ${filePath}\n\n\`\`\`\n${content}\n\`\`\`\n\n`;
+            // 检测文件扩展名来确定代码语言
+            const fileExtension = filePath.split('.').pop();
+            let language = '';
+            
+            switch (fileExtension) {
+              case 'js':
+              case 'jsx':
+                language = 'javascript';
+                break;
+              case 'ts':
+              case 'tsx':
+                language = 'typescript';
+                break;
+              case 'py':
+                language = 'python';
+                break;
+              case 'java':
+                language = 'java';
+                break;
+              case 'cpp':
+              case 'cc':
+              case 'cxx':
+                language = 'cpp';
+                break;
+              case 'c':
+                language = 'c';
+                break;
+              case 'css':
+                language = 'css';
+                break;
+              case 'html':
+                language = 'html';
+                break;
+              case 'json':
+                language = 'json';
+                break;
+              case 'md':
+                language = 'markdown';
+                break;
+              case 'yml':
+              case 'yaml':
+                language = 'yaml';
+                break;
+              case 'xml':
+                language = 'xml';
+                break;
+              case 'sql':
+                language = 'sql';
+                break;
+              case 'sh':
+              case 'bash':
+                language = 'bash';
+                break;
+              case 'dockerfile':
+                language = 'dockerfile';
+                break;
+              default:
+                language = 'text';
+            }
+            
+            // 处理转义字符，将 \\n 转换为真正的换行符
+            const formattedContent = content
+              .replace(/\\n/g, '\n')
+              .replace(/\\t/g, '\t')
+              .replace(/\\"/g, '"')
+              .replace(/\\'/g, "'");
+            
+            resultContent += `### ${filePath}\n\n\`\`\`${language}\n${formattedContent}\n\`\`\`\n\n`;
           });
         }
         
@@ -157,11 +267,47 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnaly
 
   useEffect(() => {
     if (result) {
-      mermaid.run({
-        nodes: document.querySelectorAll('.language-mermaid'),
-      });
+      // 延迟执行mermaid渲染，确保DOM已更新
+      const timeoutId = setTimeout(() => {
+        renderMermaidDiagrams();
+      }, 300);
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [result]);
+
+  // 专门的mermaid渲染函数
+  const renderMermaidDiagrams = async () => {
+    const mermaidElements = document.querySelectorAll('.language-mermaid');
+    
+    for (let i = 0; i < mermaidElements.length; i++) {
+      const element = mermaidElements[i];
+      const mermaidCode = element.textContent.trim();
+      
+      if (!mermaidCode) continue;
+      
+      try {
+        // 创建唯一ID
+        const id = `mermaid-${Date.now()}-${i}`;
+        element.id = id;
+        
+        // 使用mermaid.run渲染
+        await mermaid.run({
+          nodes: [element]
+        });
+      } catch (error) {
+        console.error('Mermaid渲染失败:', error);
+        // 显示错误信息
+        element.innerHTML = `
+          <div style="color: #d73a49; padding: 1rem; border: 1px solid #d73a49; border-radius: 4px; background: #ffeaea;">
+            <strong>图表渲染失败</strong><br>
+            <small>请检查 Mermaid 语法是否正确</small><br>
+            <code style="font-size: 0.8em;">${error.message}</code>
+          </div>
+        `;
+      }
+    }
+  };
 
   // 渲染分析内容
   const renderContent = () => {
@@ -182,21 +328,35 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnaly
           components={{
             code({ node, inline, className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || '');
-              if (match && match[1] === 'mermaid') {
+              const language = match ? match[1] : '';
+              const code = String(children).replace(/\n$/, '');
+              
+              if (match && language === 'mermaid') {
                 return (
-                  <div className="language-mermaid" {...props}>
-                    {String(children)}
+                  <div 
+                    className={`${styles.mermaidContainer} language-mermaid`} 
+                    {...props}
+                  >
+                    {code}
                   </div>
                 );
               }
+              
               return !inline && match ? (
-                <pre className={styles.codeBlock}>
-                  <code className={className} {...props}>
-                    {String(children).replace(/\n$/, '')}
-                  </code>
-                </pre>
+                <div className={styles.codeBlockContainer}>
+                  {language && (
+                    <div className={styles.codeBlockHeader}>
+                      <span className={styles.codeLanguage}>{language}</span>
+                    </div>
+                  )}
+                  <pre className={styles.codeBlock}>
+                    <code className={className} {...props}>
+                      {code}
+                    </code>
+                  </pre>
+                </div>
               ) : (
-                <code className={className} {...props}>
+                <code className={styles.inlineCode} {...props}>
                   {children}
                 </code>
               );
