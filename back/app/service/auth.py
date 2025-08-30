@@ -21,7 +21,7 @@ __all__ = [
     'check_repo_permission',
     'OAUTH_REDIRECT_URL',
 ]
-OAUTH_REDIRECT_URL = urljoin(settings.self_url, '/_/auth/callback')
+OAUTH_REDIRECT_URL = settings.gitlab_oauth_redirect_url#urljoin(settings.self_url, '/_/auth/callback')
 
 async def get_token_from_callback_code(code: str) -> GitlabToken:
     async with AsyncClient() as client:
