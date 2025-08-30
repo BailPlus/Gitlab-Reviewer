@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     self_url: str = ""   # XXX: 待适配其他模块
     database_url: str = ""
     gitlab_url: str = ""
+    gitlab_oauth_redirect_url: str = ""
     gitlab_client_id: str = ""
     gitlab_client_secret: str = ""
     gitlab_webhook_token: str = ""  # webhook防伪token
