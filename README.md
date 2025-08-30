@@ -21,17 +21,33 @@ Gitlab-Reviewer 的主要功能是：
 - 一个待部署的服务器，要求能与 GitLab 服务器进行双向通信
 - （可选）邮箱 smtp 账号密码
 
-### 下载和安装
+### 安装
+#### 后端
+1. 安装 `uv` 运行环境，并进入 `back` 目录
+2. 创建配置文件
+  ```bash
+  mv .env.template .env
+  ```
+3. 向 `.env` 文件中填写相关字段（详见下文）
+4. 启动命令：
+  ```bash
+  uv run run.py
+  ```
 
-1. 安装 `uv` 和 `node.js` 运行环境
-2. 将 `back/.env.example` 复制为 `.env` ，并填写相关字段（详见下文）
-3. 在 `back` 目录下执行 `uv run run.py` 即可启动后端服务。
-4. 在 `front` 目录下创建 `.env.local` 文件，并填写相关字段（详见下文）
-5. 在 `front` 目录下执行 `npm install` 和 `npm run dev` 启动前端服务。
+#### 前端
+1. 安装 `node.js` 运行环境，并进入 `front` 目录
+2. 安装前端依赖
+  ```bash
+  npm install
+  ```
+3. 按照下面的说明，填写配置文件 `.env.local`
+4. 启动命令：
+  ```bash
+  npm run dev
+  ```
 
-### 容器化
-
-???
+### docker 部署
+在 `docker-compose.yml` 文件中修改 `back` 和 `front` 容器的 `environment` 配置项。
 
 ### 配置说明
 
@@ -112,21 +128,9 @@ NEXT_PUBLIC_GITLAB_BASE_URL=https://gitlab.example.com/
 
 欢迎提交 Issue 和 Pull Request 来改进本项目。
 
-### 开发流程
-
-1. Fork 本项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
-
 ## 许可证
 
 本项目采用 GPLv3 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
-
-## 联系方式
-
-项目链接: [https://your-gitlab-url/gitlab-reviewer](https://your-gitlab-url/gitlab-reviewer)
 
 ## 致谢
 
