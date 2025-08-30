@@ -9,7 +9,7 @@ import { LoadingSpinner } from './ui/Skeleton';
 import GitLabIcon from './ui/GitLabIcon';
 import { backendService } from '../lib/api';
 
-const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
+const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnalysis, onBackToRepository, isCommitAnalysis = false }) => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,12 +72,19 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
   };
 
   useEffect(() => {
-    setCurrentAnalysisId(analysisId);
-  }, [analysisId]);
+    if (!isCommitAnalysis) {
+      setCurrentAnalysisId(analysisId);
+    }
+  }, [analysisId, isCommitAnalysis]);
+
+  // 初始化Mermaid
+  useEffect(() => {
+    mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+  }, []);
 
   // 获取分析历史
   useEffect(() => {
-    if (project?.id) {
+    if (project?.id && !isCommitAnalysis) {
       const fetchAnalysisHistory = async () => {
         setHistoryLoading(true);
         try {
@@ -93,10 +100,36 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
       };
       fetchAnalysisHistory();
     }
-  }, [project?.id]);
+  }, [project?.id, isCommitAnalysis]);
+
+  // 处理提交分析数据
+  useEffect(() => {
+    if (isCommitAnalysis && commitAnalysis) {
+      setLoading(false);
+      setError(null);
+      
+      try {
+        const reviewData = JSON.parse(commitAnalysis.analysis.review);
+        let resultContent = reviewData.info || '';
+        
+        // 如果有建议，添加建议部分
+        if (reviewData.suggestion && typeof reviewData.suggestion === 'object') {
+          resultContent += '\n\n## 修改建议\n\n';
+          Object.entries(reviewData.suggestion).forEach(([filePath, content]) => {
+            resultContent += `### ${filePath}\n\n\`\`\`\n${content}\n\`\`\`\n\n`;
+          });
+        }
+        
+        setResult(resultContent);
+      } catch (parseError) {
+        console.error('解析提交分析数据失败:', parseError);
+        setError('解析分析数据失败');
+      }
+    }
+  }, [isCommitAnalysis, commitAnalysis]);
 
   useEffect(() => {
-    if (currentAnalysisId) {
+    if (currentAnalysisId && !isCommitAnalysis) {
       const fetchAnalysis = async () => {
         setLoading(true);
         setError(null);
@@ -218,36 +251,70 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings }) => {
       {/* 标题栏 */}
       <div className={styles.analysisHeader}>
         <div className={styles.projectInfo}>
-          <h1 className={styles.projectName}>{project?.name}</h1>
-          <p className={styles.projectDescription}>{project?.description || '暂无描述'}</p>
+          {isCommitAnalysis ? (
+            <>
+              <h1 className={styles.projectName}>
+                提交分析: {commitAnalysis?.commitTitle}
+              </h1>
+              <p className={styles.projectDescription}>
+                提交ID: {commitAnalysis?.commitId} | 作者: {commitAnalysis?.author} | 
+                时间: {commitAnalysis?.createdAt ? new Date(commitAnalysis.createdAt).toLocaleString('zh-CN') : ''}
+                {commitAnalysis?.analysis?.level !== undefined && (
+                  <span className={styles.levelIndicator}>
+                    {' | 级别: '}
+                    <span className={styles[`level${commitAnalysis.analysis.level}`]}>
+                      {['普通事件', '代码漏洞', '安全漏洞', '信息泄露'][commitAnalysis.analysis.level] || '未知'}
+                    </span>
+                  </span>
+                )}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className={styles.projectName}>{project?.name}</h1>
+              <p className={styles.projectDescription}>{project?.description || '暂无描述'}</p>
+            </>
+          )}
         </div>
         <div className={styles.headerActions}>
-          {/* 分析历史选择 */}
-          {analysisHistory.length > 0 && (
-            <div className={styles.analysisSelector}>
-              <label htmlFor="analysis-select">分析版本:</label>
-              <select 
-                id="analysis-select"
-                value={currentAnalysisId || ''}
-                onChange={(e) => setCurrentAnalysisId(parseInt(e.target.value))}
-                className={styles.analysisSelect}
-                disabled={historyLoading}
+          {isCommitAnalysis ? (
+            <button 
+              className={styles.repositorySettingsButton}
+              onClick={onBackToRepository}
+              title="返回仓库分析"
+            >
+              <span>← 返回仓库</span>
+            </button>
+          ) : (
+            <>
+              {/* 分析历史选择 */}
+              {analysisHistory.length > 0 && (
+                <div className={styles.analysisSelector}>
+                  <label htmlFor="analysis-select">分析版本:</label>
+                  <select 
+                    id="analysis-select"
+                    value={currentAnalysisId || ''}
+                    onChange={(e) => setCurrentAnalysisId(parseInt(e.target.value))}
+                    className={styles.analysisSelect}
+                    disabled={historyLoading}
+                  >
+                    {analysisHistory.map((id) => (
+                      <option key={id} value={id}>
+                        分析 #{id} {id === analysisId ? '(最新)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <button 
+                className={styles.repositorySettingsButton}
+                onClick={onRepositorySettings}
+                title="仓库设置"
               >
-                {analysisHistory.map((id) => (
-                  <option key={id} value={id}>
-                    分析 #{id} {id === analysisId ? '(最新)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <span>设置</span>
+              </button>
+            </>
           )}
-          <button 
-            className={styles.repositorySettingsButton}
-            onClick={onRepositorySettings}
-            title="仓库设置"
-          >
-            <span>设置</span>
-          </button>
         </div>
       </div>
       

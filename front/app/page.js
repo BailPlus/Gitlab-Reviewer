@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import { useAuth } from "./hooks/useAuth";
 import { useProjects } from "./hooks/useProjects";
 import { useModal } from "./hooks/useUI";
@@ -30,6 +31,10 @@ export default function Home() {
   // UI状态
   const settingsModal = useModal();
   const repositorySettingsModal = useModal();
+
+  // 提交分析状态
+  const [commitAnalysis, setCommitAnalysis] = useState(null);
+  const [showCommitAnalysis, setShowCommitAnalysis] = useState(false);
 
   // 处理项目选择
   const handleProjectSelect = (project) => {
@@ -77,6 +82,18 @@ export default function Home() {
     repositorySettingsModal.close();
   };
 
+  // 处理提交分析点击
+  const handleCommitAnalysisClick = (commitData) => {
+    setCommitAnalysis(commitData);
+    setShowCommitAnalysis(true);
+  };
+
+  // 处理返回仓库分析
+  const handleBackToRepositoryAnalysis = () => {
+    setShowCommitAnalysis(false);
+    setCommitAnalysis(null);
+  };
+
   return (
     <div className={styles.containerWrapper}>
       {/* 登录界面 */}
@@ -107,12 +124,21 @@ export default function Home() {
             {!selectedProject ? (
               // 如果没有已绑定的项目，显示仓库绑定界面
               <RepositoryBinding onRepositoryBound={handleRepositoryBound} />
+            ) : showCommitAnalysis ? (
+              // 显示提交分析结果
+              <AnalysisResult 
+                commitAnalysis={commitAnalysis}
+                project={selectedProject}
+                onBackToRepository={handleBackToRepositoryAnalysis}
+                isCommitAnalysis={true}
+              />
             ) : (
-              // 如果选中了项目，显示分析结果
+              // 如果选中了项目，显示仓库分析结果
               <AnalysisResult 
                 analysisId={selectedProject.analysis_id} 
                 project={selectedProject}
                 onRepositorySettings={handleRepositorySettings}
+                isCommitAnalysis={false}
               />
             )}
           </div>
@@ -120,7 +146,10 @@ export default function Home() {
 
         {/* 右侧提交历史栏 */}
         {selectedProject && (
-          <CommitHistorySidebar project={selectedProject} />
+          <CommitHistorySidebar 
+            project={selectedProject} 
+            onCommitAnalysisClick={handleCommitAnalysisClick}
+          />
         )}
       </div>
 

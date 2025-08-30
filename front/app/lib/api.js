@@ -174,6 +174,12 @@ export const backendService = {
     // 获取分析历史
     getAnalysisHistory: (repoId) => backendApi(`/api/analysis/history?repo_id=${repoId}`),
   },
+
+  // 提交分析相关API
+  commits: {
+    // 获取提交分析
+    getCommitReview: (commitId) => backendApi(`/api/commits/${commitId}/review`),
+  },
 };
 
 // 工具函数

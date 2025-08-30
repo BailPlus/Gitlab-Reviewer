@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { gitlabService } from '../lib/api';
+import { gitlabService, backendService } from '../lib/api';
 import styles from '../page.module.css';
 
-const CommitHistorySidebar = ({ project }) => {
+const CommitHistorySidebar = ({ project, onCommitAnalysisClick }) => {
   const [pushEvents, setPushEvents] = useState([]);
   const [commitsData, setCommitsData] = useState({});
   const [loading, setLoading] = useState(false);
@@ -93,6 +93,31 @@ const CommitHistorySidebar = ({ project }) => {
     return message.split('\n')[0]; // 只显示第一行
   };
 
+  // 处理点击 push 事件，获取提交分析
+  const handlePushEventClick = async (pushEvent) => {
+    if (!onCommitAnalysisClick) return;
+    
+    try {
+      const commitTo = pushEvent.push_data.commit_to;
+      const response = await backendService.commits.getCommitReview(commitTo);
+      
+      if (response.status === 0) {
+        // 传递分析数据给父组件
+        onCommitAnalysisClick({
+          commitId: commitTo,
+          commitTitle: pushEvent.push_data.commit_title,
+          author: pushEvent.author.name,
+          createdAt: pushEvent.created_at,
+          analysis: response.data
+        });
+      } else {
+        console.error('获取提交分析失败:', response.info);
+      }
+    } catch (error) {
+      console.error('获取提交分析失败:', error);
+    }
+  };
+
   if (!project) {
     return null;
   }
@@ -115,11 +140,17 @@ const CommitHistorySidebar = ({ project }) => {
           <div key={pushEvent.id} className={styles.pushEventItem}>
             <div 
               className={styles.pushEventHeader}
-              onClick={() => togglePushExpanded(pushEvent.id)}
+              onClick={() => handlePushEventClick(pushEvent)}
             >
               <div className={styles.pushEventInfo}>
                 <div className={styles.pushEventTitle}>
-                  <span className={styles.expandIcon}>
+                  <span 
+                    className={styles.expandIcon}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePushExpanded(pushEvent.id);
+                    }}
+                  >
                     {expandedPushes.has(pushEvent.id) ? '▼' : '▶'}
                   </span>
                   <strong>{pushEvent.push_data.commit_title}</strong>

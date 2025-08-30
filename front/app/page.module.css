@@ -1790,3 +1790,25 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* 提交分析级别指示器样式 */
+.levelIndicator {
+  font-weight: 500;
+}
+
+.level0 {
+  color: #059669; /* 绿色 - 普通事件 */
+}
+
+.level1 {
+  color: #f59e0b; /* 黄色 - 代码漏洞 */
+}
+
+.level2 {
+  color: #ef4444; /* 红色 - 安全漏洞 */
+}
+
+.level3 {
+  color: #dc2626; /* 深红色 - 信息泄露 */
+  font-weight: 600;
+}
