@@ -34,19 +34,17 @@ def handle_pipeline_event(data: dict):
 
     # 处理流水线结果
     job_results: dict[str, dict[str, str]] = {}
-    for job in jobs:
-        if job.name in JOBS:
-            logging.info(f"Handling job {job.name}")
+    for pipeline_job in jobs:
+        if pipeline_job.name in JOBS:
+            logging.info(f"Handling job {pipeline_job.name}")
+            job = project.jobs.get(pipeline_job.id)
             job_results[job.name] = {}
             for filename in JOBS[job.name]:
                 logging.info(f"Downloading file {filename}")
-                buffer = io.BytesIO()
                 try:
-                    job.artifacts(filename, stream=True, action=buffer.write)
+                    job_results[job.name][filename] = job.artifact(filename).decode()
                 except Exception as e:
                     logging.error(f"Failed to download file {filename}: {e}")
-                else:
-                    job_results[job.name][filename] = buffer.getvalue().decode()
 
     # 生成代码检查结果
     Thread(target=_review_thread, args=(project.id, mr_iid, job_results)).start()
