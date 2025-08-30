@@ -24,7 +24,7 @@ def create_review(repo_id: int, mr_iid: int) -> MrReview:
 
 def get_mr_review(repo_id: int, mr_iid: int) -> MrReview:
     """
-    获取merge request的评论
+    获取merge request的评审
     """
     with get_session() as session:
         review = session.exec(

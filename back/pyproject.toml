@@ -1,7 +1,7 @@
 [project]
-name = "back"
-version = "0.1.0"
-description = "Add your description here"
+name = "Gitlab_Reviewer_backend"
+version = "1.0"
+description = "使用人工智能对私有化gitlab中的仓库、提交、合并请求进行评审"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

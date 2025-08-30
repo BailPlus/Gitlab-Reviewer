@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 from httpx import AsyncClient
 from gitlab import Gitlab
 from fastapi import Request
@@ -30,7 +31,7 @@ async def get_token_from_callback_code(code: str) -> GitlabToken:
                 "client_secret": settings.gitlab_client_secret,
                 "code": code,
                 "grant_type": "authorization_code",
-                "redirect_uri": settings.gitlab_oauth_redirect_url
+                "redirect_uri": urljoin(settings.self_url, '/_/auth/callback')
             }
         )
     if token_resp.status_code != 200:
