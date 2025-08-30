@@ -27,6 +27,10 @@ const RepositoryBinding = ({ onRepositoryBound }) => {
       if (response.status === 0 && response.data) {
         const boundIds = response.data.map(repo => repo.id);
         setBoundRepositoryIds(boundIds);
+        // 在获取到绑定列表后立即尝试加载自有仓库（避免首次点击还没加载的空白状态）
+        if (ownRepositories.length === 0) {
+          fetchOwnRepositories(boundIds); // 传入最新的绑定ID列表
+        }
       }
     } catch (error) {
       console.error('Failed to fetch bound repositories:', error);
@@ -34,12 +38,13 @@ const RepositoryBinding = ({ onRepositoryBound }) => {
   };
 
   // 获取用户拥有的GitLab仓库
-  const fetchOwnRepositories = async () => {
+  const fetchOwnRepositories = async (overrideBoundIds) => {
     setLoadingOwnRepos(true);
     try {
       const repos = await gitlabService.getProjects({ owned: true, per_page: 20 });
       // 过滤掉已绑定的仓库
-      const unboundRepos = repos.filter(repo => !boundRepositoryIds.includes(repo.id));
+      const boundIdsRef = overrideBoundIds || boundRepositoryIds; // 支持提前传入的绑定ID（状态尚未来得及更新）
+      const unboundRepos = repos.filter(repo => !boundIdsRef.includes(repo.id));
       setOwnRepositories(unboundRepos);
     } catch (error) {
       console.error('Failed to fetch own repositories:', error);
@@ -77,6 +82,18 @@ const RepositoryBinding = ({ onRepositoryBound }) => {
     fetchBoundRepositories();
   }, []);
 
+  // 如果 1 秒后仍未加载用户仓库且用户未输入内容，则自动尝试加载一次，提升首次体验
+  useEffect(() => {
+    if (ownRepositories.length === 0 && !loadingOwnRepos) {
+      const timer = setTimeout(() => {
+        if (ownRepositories.length === 0 && !loadingOwnRepos) {
+          fetchOwnRepositories();
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [ownRepositories.length, loadingOwnRepos]);
+
   // 处理输入变化
   const handleInputChange = (e) => {
     const value = e.target.value;
@@ -97,7 +114,8 @@ const RepositoryBinding = ({ onRepositoryBound }) => {
   // 处理输入框聚焦
   const handleInputFocus = () => {
     setShowDropdown(true);
-    if (ownRepositories.length === 0 && boundRepositoryIds.length > 0) {
+    // 之前限制必须已绑定仓库才加载，这会导致首次进入为空；现在只要还没加载就拉取
+    if (ownRepositories.length === 0 && !loadingOwnRepos) {
       fetchOwnRepositories();
     }
   };
