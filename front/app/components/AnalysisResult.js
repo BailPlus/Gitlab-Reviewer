@@ -498,6 +498,23 @@ const AnalysisResult = ({ analysisId, project, onRepositorySettings, commitAnaly
       {/* 分析结果内容 */}
       <div className={styles.analysisResult}>
         {renderContent()}
+        
+        {/* MR操作按钮 */}
+        {isCommitAnalysis && commitAnalysis?.isMergeRequest && commitAnalysis?.mergeRequestState === 'opened' && (
+          <div className={styles.mergeRequestActions}>
+            <button 
+              className={styles.approveButton}
+              onClick={() => {
+                const gitlabMrUrl = `${project?.web_url}/-/merge_requests/${commitAnalysis?.mergeRequestIid}`;
+                window.open(gitlabMrUrl, '_blank');
+              }}
+              title="在GitLab中查看并同意此Merge Request"
+            >
+              <GitLabIcon size={16} />
+              <span>在GitLab中同意此MR</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

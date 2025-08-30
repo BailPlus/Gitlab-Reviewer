@@ -187,6 +187,18 @@ export const backendService = {
     getMergeRequestReview: (repoId, mergeRequestIid) => 
       backendApi(`/api/merge_requests/${repoId}/${mergeRequestIid}/review`),
   },
+
+  // 通知设置相关API
+  notifications: {
+    // 获取通知设置
+    getSettings: () => backendApi('/api/notifications/settings'),
+    
+    // 更新通知设置
+    updateSettings: (settings) => backendApi('/api/notifications/settings', {
+      method: 'POST',
+      body: JSON.stringify(settings),
+    }),
+  },
 };
 
 // 工具函数
