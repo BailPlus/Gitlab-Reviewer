@@ -30,6 +30,10 @@ if settings.gitlab_oauth_redirect_url:
 #     }, ensure_ascii=False)
 # openai.generate_mr_review = mock_openai_generate_mr_review
 
+app.docs_url = '/docs'
+app.redoc_url = '/redoc'
+app.openapi_url = '/openapi.json'
+app.setup()
 @app.middleware('http')
 async def show_pkg(request, call_next):
     print(request.headers)

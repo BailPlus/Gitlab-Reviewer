@@ -1,5 +1,4 @@
 from sqlmodel import SQLModel, create_engine, Session
-from sqlalchemy import Engine
 from ..core.config import settings
 # 以下导入仅用于SQLModel.metadata.create_all(engine)时检测到所有的表
 from ..model.users import User
