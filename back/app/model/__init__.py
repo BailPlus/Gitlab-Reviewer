@@ -1,3 +1,4 @@
+from enum import Enum
 from sqlalchemy import Column, func, DateTime
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -19,3 +20,9 @@ class TimestampMixin:
             onupdate=func.now(),
             nullable=False
         )
+
+
+class ReviewStatus(str, Enum):
+    PENDING = 'pending'
+    COMPLETED = 'completed'
+    FAILED = 'failed'

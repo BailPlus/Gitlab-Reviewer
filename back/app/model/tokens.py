@@ -1,14 +1,16 @@
-from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlmodel import SQLModel, Field, Relationship
 from . import TimestampMixin
+from .users import User
+import time
 
 
 class Token(TimestampMixin, SQLModel, table=True):
     __tablename__ = "tokens" # type: ignore
-    token: str = Field(primary_key=True)
-    user_id: int = Field(sa_column=Column(
-        Integer,
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False
-    ))
-    exp: int = Field(nullable=False)
+    token: str = Field(primary_key=True, description="token")
+    user_id: int = Field(foreign_key="users.id", description="用户id", ondelete="CASCADE")
+    user: User = Relationship()
+    exp: int = Field(nullable=False, description="过期时间")
+
+    @property
+    def is_expired(self) -> bool:
+        return time.time() > self.exp

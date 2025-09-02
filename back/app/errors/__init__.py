@@ -5,9 +5,9 @@ from ..schema import BaseOutput
 
 class ExceptionDetails(BaseOutput[None]):
     """异常详情"""
-    status: int = Field(-1, description="应用内状态码")
-    info: str = Field("异常详情", description="状态信息")
-    data: None = Field(None, description="数据")
+    status: int = Field(default=-1, description="应用内状态码")
+    info: str = Field(default="异常详情", description="状态信息")
+    data: None = Field(default=None, description="数据")
 
 class GitlabReviewerException(Exception):
     """代码评审异常基类"""

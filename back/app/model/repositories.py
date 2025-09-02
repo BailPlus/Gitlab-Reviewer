@@ -1,7 +1,9 @@
 from typing import Optional
-from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Column, Integer
+from sqlalchemy.orm import relationship
 from . import TimestampMixin
+from .repository_analyses import RepositoryAnalysis
 
 
 class Repository(TimestampMixin, SQLModel, table=True):
@@ -12,8 +14,20 @@ class Repository(TimestampMixin, SQLModel, table=True):
         autoincrement=False,
         nullable=False
     ), description='gitlab中的仓库id')
-    analysis_id: Optional[int] = Field(default=None, sa_column=Column(
-        Integer,
-        ForeignKey("repository_analyses.id", ondelete="CASCADE"),
-        nullable=True,  # 双向外键不能同时为非空
-    ), description='用户id')
+    analysis_id: Optional[int] = Field(
+        default=None,
+        foreign_key='repository_analyses.id',
+        nullable=True,
+        description='最新分析id'
+    )
+    analysis: RepositoryAnalysis = Relationship(
+        cascade_delete=True,
+        sa_relationship=relationship(
+            'RepositoryAnalysis',
+            foreign_keys='Repository.analysis_id',
+            uselist=False,
+            cascade='all, delete',
+            single_parent=True
+        )
+    )
+    webhook_id: int = Field(description='webhook id')

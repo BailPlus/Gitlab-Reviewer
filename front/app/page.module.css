@@ -1,0 +1,2317 @@
+/* Component-specific styles for page.js */
+.containerWrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.loginOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  flex-direction: column;
+  background-color: #ffffff; /* 完全不透明的白色背景 */
+}
+
+.loginContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10vh; /* Increase gap to push title up */
+  z-index: 1;
+}
+
+.projectTitle {
+  font-size: 3.5rem;
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+  font-family: "Courier New", Courier, monospace;
+  white-space: nowrap;
+}
+
+.cursor {
+  display: inline-block;
+  width: 3px;
+  height: 3.5rem;
+  background-color: rgb(var(--foreground-rgb));
+  margin-left: 8px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from,
+  to {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgb(var(--foreground-rgb));
+  }
+}
+
+.backgroundGradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ffffff; /* 完全不透明的白色背景，替代原来的透明渐变 */
+  z-index: -1;
+}
+
+.blurred {
+  filter: blur(4px);
+}
+
+/* Loading state - No longer a full page, but can be used for smaller components */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.2rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+/* Login View */
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgb(var(--background-rgb));
+}
+
+.loginButtonLarge {
+  padding: 14px 28px;
+  border-radius: 8px;
+  border: none;
+  background: var(--gitlab-orange);
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.loginButtonLarge:hover {
+  background-color: var(--gitlab-orange-hover);
+  transform: translateY(-2px);
+}
+
+/* Logged-in View */
+.container {
+  display: flex;
+  height: 100vh;
+  transition: filter 0.3s ease-in-out;
+  overflow: hidden; /* 防止整体容器溢出 */
+}
+
+.sidebar {
+  width: 260px;
+  min-width: 260px; /* 确保左侧栏不会被压缩 */
+  max-width: 260px; /* 确保左侧栏不会扩展 */
+  background-color: rgb(var(--sidebar-rgb));
+  border-right: 1px solid rgb(var(--border-rgb));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  box-sizing: border-box; /* 确保padding计算在宽度内 */
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+}
+
+.avatar {
+  border-radius: 50%;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  min-width: 0; /* Prevent flex item from overflowing */
+}
+
+.userName,
+.userUsername,
+.userEmail {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userName {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.userUsername {
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.userEmail {
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.repoNav {
+  margin-top: 24px;
+}
+
+.repoTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(var(--text-secondary-rgb));
+  padding: 0 8px 8px 8px;
+}
+
+.repoList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.repoItem {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: #6b7280;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box; /* 确保统一的盒模型 */
+}
+
+.repoItem:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.repoItemSelected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white !important;
+  font-weight: 600;
+}
+
+.addRepoItem {
+  color: #6b7280;
+  margin-bottom: 8px;
+  justify-content: center;
+  font-weight: 500; /* 与普通仓库项保持一致 */
+}
+
+.addRepoItem:hover {
+  border-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+  color: #3b82f6;
+}
+
+.addIcon {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.settings {
+  padding: 8px;
+}
+
+.settings a {
+  color: rgb(var(--foreground-rgb));
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.settings a:hover {
+  background-color: rgba(var(--foreground-rgb), 0.05);
+  color: rgb(var(--foreground-rgb));
+}
+
+/* Skeleton Styles */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.skeleton {
+  background-color: rgba(var(--border-rgb), 0.7);
+  border-radius: 6px;
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeletonAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeletonText {
+  height: 1em;
+  width: 100px;
+  margin-bottom: 6px;
+}
+
+.skeletonTextShort {
+  height: 0.9em;
+  width: 70px;
+}
+
+.skeletonRepoItem {
+  height: 37px; /* Matches .repoItem padding + font-size */
+  width: 100%;
+}
+
+.skeletonSettings {
+  height: 41px; /* Matches .settings a padding + font-size */
+  width: 100%;
+}
+
+.main {
+  flex: 1; /* 使用flex: 1 而不是 flex-grow: 1 */
+  min-width: 0; /* 允许主内容区域收缩 */
+  display: flex;
+  justify-content: flex-start;
+  padding: 0;
+  background: rgb(var(--background-rgb));
+  overflow-y: auto;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.main::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.mainContent {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden; /* 防止水平溢出 */
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.mainContent::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: rgb(var(--text-secondary-rgb));
+  text-align: center;
+}
+
+.placeholder h1 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.mainTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgb(var(--text-secondary-rgb));
+  margin: 8px 0 32px 0;
+}
+
+.repoForm {
+  display: flex;
+  gap: 12px;
+}
+
+.repoInput {
+  flex-grow: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgb(var(--border-rgb));
+  font-size: 0.9rem;
+  background-color: rgb(var(--background-rgb));
+  color: rgb(var(--foreground-rgb));
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.repoInput:focus {
+  outline: none;
+  border-color: rgb(var(--accent-rgb));
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+}
+
+.repoButton {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: rgb(var(--accent-rgb));
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.repoButton:hover {
+  background-color: rgb(var(--accent-hover-rgb));
+}
+
+.welcomeMessage {
+  text-align: center;
+  margin-top: 20vh;
+}
+
+/* 项目详情样式 */
+.projectDetailsContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.projectInfo {
+  margin-bottom: 24px;
+  margin-top: 16px;
+}
+
+.projectInfo h3 {
+  font-size: 1.5rem; /* 增大字体 */
+  margin-bottom: 8px;
+}
+
+.projectHeader {
+  margin-bottom: 16px;
+}
+
+.projectName {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: rgb(var(--foreground-rgb));
+}
+
+.projectMeta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.projectId,
+.projectVisibility,
+.projectLanguage {
+  background: rgb(var(--sidebar-rgb));
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.projectDescription {
+  margin: 16px 0;
+  color: rgb(var(--text-secondary-rgb));
+  line-height: 1.5;
+}
+
+.projectStats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.statValue {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+}
+
+/* 分支信息样式 */
+.branchesSection,
+.commitsSection,
+.mergeRequestsSection {
+  background: white;
+  border: 1px solid rgb(var(--border-rgb));
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: rgb(var(--foreground-rgb));
+}
+
+.branchesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.branchItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgb(var(--sidebar-rgb));
+  border-radius: 6px;
+  border: 1px solid rgb(var(--border-rgb));
+}
+
+.branchName {
+  font-weight: 500;
+  color: rgb(var(--foreground-rgb));
+}
+
+.branchProtected {
+  background: #dc2626;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+}
+
+.branchDefault {
+  background: #059669;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+}
+
+/* 提交记录样式 */
+.commitsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.commitItem {
+  padding: 16px;
+  border: 1px solid rgb(var(--border-rgb));
+  background: rgb(var(--sidebar-rgb));
+}
+
+.commitHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.commitMessage {
+  font-weight: 500;
+  color: rgb(var(--foreground-rgb));
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+}
+
+/* 新增：提交信息单行显示容器 */
+.commitSingleLine {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.commitId {
+  background: rgb(var(--border-rgb));
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: rgb(var(--text-secondary-rgb));
+}
+
+.commitMeta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.commitAuthor {
+  font-weight: 500;
+  color: rgb(var(--accent-rgb));
+  font-size: 0.65rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.commitDate {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+}
+
+.commitDescription {
+  margin: 8px 0;
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.commitStats {
+  display: flex;
+  gap: 8px;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.commitStats span:first-child {
+  color: #059669;
+}
+
+.commitStats span:last-child {
+  color: #dc2626;
+}
+
+/* 合并请求样式 */
+.mergeRequestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mergeRequestItem {
+  padding: 16px;
+  border: 1px solid rgb(var(--border-rgb));
+  border-radius: 8px;
+  background: rgb(var(--sidebar-rgb));
+}
+
+.mrHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.mrTitle {
+  font-weight: 500;
+  color: rgb(var(--foreground-rgb));
+  flex: 1;
+}
+
+.mrState {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.mrStateopened {
+  background: #059669;
+  color: white;
+}
+
+.mrStateclosed {
+  background: #dc2626;
+  color: white;
+}
+
+.mrStatemerged {
+  background: #7c3aed;
+  color: white;
+}
+
+.mrMeta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.mrAuthor {
+  font-weight: 500;
+  color: rgb(var(--accent-rgb));
+}
+
+.mrBranch {
+  font-family: monospace;
+  background: rgb(var(--border-rgb));
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.mrDate {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+}
+
+.mrDescription {
+  margin: 8px 0;
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* 设置按钮样式 */
+.settingsButton {
+  color: rgb(var(--foreground-rgb));
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.settingsButton:hover {
+  background-color: rgba(var(--foreground-rgb), 0.05);
+  color: rgb(var(--foreground-rgb));
+}
+
+/* 设置弹窗样式 */
+.settingsOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+/* RepositorySettingsModal.js */
+.settingsModal {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 550px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.settingsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgb(var(--border-rgb));
+}
+
+.settingsHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: rgb(var(--text-secondary-rgb));
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: rgba(var(--foreground-rgb), 0.1);
+}
+
+.settingsContent {
+  padding: 0 24px 24px 24px;
+}
+
+.settingsSection {
+  margin-bottom: 24px;
+}
+
+.settingsSection h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+}
+
+/* 用户信息区域 */
+.userInfoSection {
+  padding: 16px;
+  background: rgb(var(--sidebar-rgb));
+  border-radius: 8px;
+  border: 1px solid rgb(var(--border-rgb));
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settingsAvatar {
+  border-radius: 50%;
+}
+
+.userDetails {
+  flex: 1;
+}
+
+.settingsUserName {
+  font-weight: 600;
+  color: rgb(var(--foreground-rgb));
+  margin-bottom: 4px;
+}
+
+.settingsUserEmail {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+}
+
+/* 注销按钮 */
+.logoutButton {
+  width: 100%;
+  padding: 12px 16px;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.logoutButton:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.logoutButton:active {
+  transform: translateY(0);
+}
+
+/* 通知设置样式 */
+.notificationSettings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  background: rgb(var(--sidebar-rgb));
+  border-radius: 8px;
+  border: 1px solid rgb(var(--border-rgb));
+}
+
+.settingLabel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settingLabel span {
+  font-weight: 500;
+  color: rgb(var(--foreground-rgb));
+}
+
+.settingLabel small {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.settingControl {
+  margin-left: 16px;
+}
+
+/* 开关样式 */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #0366d6;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #0366d6;
+}
+
+input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+input:disabled + .slider {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.webhookInfo {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #0366d6;
+}
+
+.webhookInfo small {
+  color: #586069;
+  font-family: 'SFMono-Regular', 'Monaco', 'Consolas', monospace;
+}
+
+.settingsLoading, .settingsError {
+  padding: 16px;
+  text-align: center;
+  color: rgb(var(--text-secondary-rgb));
+  font-style: italic;
+}
+
+/* 通知等级选择器 */
+.notifyLevelSelect {
+  padding: 8px 12px;
+  border: 1px solid rgb(var(--border-rgb));
+  border-radius: 6px;
+  background: rgb(var(--sidebar-rgb));
+  color: rgb(var(--foreground-rgb));
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.notifyLevelSelect:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
+}
+
+.notifyLevelSelect:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Webhook配置区域 */
+.webhookConfig {
+  margin-top: 12px;
+  padding: 16px;
+  background: rgba(3, 102, 214, 0.05);
+  border: 1px solid rgba(3, 102, 214, 0.2);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.webhookField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-weight: 500;
+  color: rgb(var(--foreground-rgb));
+  font-size: 0.9rem;
+}
+
+.webhookInput {
+  padding: 10px 12px;
+  border: 1px solid rgb(var(--border-rgb));
+  border-radius: 6px;
+  background: rgb(var(--sidebar-rgb));
+  color: rgb(var(--foreground-rgb));
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.webhookInput:focus {
+  outline: none;
+  border-color: #0366d6;
+  box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.2);
+}
+
+.webhookInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.webhookInput::placeholder {
+  color: rgb(var(--text-secondary-rgb));
+}
+
+/* 关于信息 */
+.aboutInfo {
+  color: rgb(var(--text-secondary-rgb));
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.aboutInfo p {
+  margin: 0 0 4px 0;
+}
+
+/* 暗色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .settingsModal {
+    background: rgb(var(--sidebar-rgb));
+    border: 1px solid rgb(var(--border-rgb));
+  }
+
+  .webhookInfo {
+    background: rgba(0, 0, 0, 0.3);
+    border-left-color: #58a6ff;
+  }
+
+  .slider {
+    background-color: #484f58;
+  }
+
+  input:checked + .slider {
+    background-color: #58a6ff;
+  }
+
+  .notifyLevelSelect {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: #484f58;
+  }
+
+  .notifyLevelSelect:focus {
+    border-color: #58a6ff;
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+  }
+
+  .webhookConfig {
+    background: rgba(88, 166, 255, 0.1);
+    border-color: rgba(88, 166, 255, 0.3);
+  }
+
+  .webhookInput {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: #484f58;
+  }
+
+  .webhookInput:focus {
+    border-color: #58a6ff;
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+  }
+}
+
+/* 仓库绑定组件样式 - Codex风格 */
+.repositoryBindingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 60px 20px;
+}
+
+.bindingInputContainer {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+}
+
+.inputWrapper {
+  width: 100%;
+}
+
+.inputHeader {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.inputHeader h2 {
+  margin: 0;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+}
+
+.searchInputGroup {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.searchInputGroup:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 24px rgba(59, 130, 246, 0.15);
+}
+
+.repositorySearchInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 18px 24px;
+  font-size: 16px;
+  background: transparent;
+  color: var(--foreground);
+}
+
+.repositorySearchInput::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.bindActionButton {
+  padding: 16px 28px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.bindActionButton:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.bindActionButton:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.repositoryDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  margin-top: 12px;
+}
+
+.dropdownSection {
+  padding: 12px 0;
+}
+
+.sectionHeader {
+  padding: 16px 24px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.repositoryOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f9fafb;
+}
+
+.repositoryOption:hover {
+  background: #f8fafc;
+}
+
+.repositoryOption.selected {
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.repoInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.repoName {
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.repoMeta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.visibility {
+  background: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.description {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.repoStats {
+  font-size: 12px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+.emptyState {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.errorMessage {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorMessage::before {
+  content: "⚠️";
+  font-size: 16px;
+}
+
+/* 保持旧版兼容样式 */
+.placeholder {
+  text-align: center;
+  color: var(--foreground);
+}
+
+.placeholder h1 {
+  margin-bottom: 16px;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.placeholder p {
+  margin-bottom: 32px;
+  font-size: 1.2rem;
+  color: #6b7280;
+}
+
+
+
+/* 仓库设置组件样式 */
+.repositorySettings {
+  position: relative;
+}
+
+.settingsIconButton {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.settingsIconButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.settingsDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  margin-top: 4px;
+}
+
+.settingsMenu {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+}
+
+.settingsMenuItem {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: #374151;
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settingsMenuItem:hover {
+  background: #f3f4f6;
+}
+
+.projectTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.confirmOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirmModal {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.confirmHeader h3 {
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.confirmContent p {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.warning {
+  color: #dc2626 !important;
+  font-size: 0.9rem;
+  background: #fef2f2;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #dc2626;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.cancelButton {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #e5e7eb;
+}
+
+.confirmButton {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.confirmButton:hover {
+  background: #b91c1c;
+}
+
+.confirmButton:disabled,
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 分析结果和状态样式 */
+.analysisResult {
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  line-height: 1.7;
+  color: #24292e;
+  overflow-y: auto;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.analysisResult::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.analysisResult h1,
+.analysisResult h2,
+.analysisResult h3,
+.analysisResult h4,
+.analysisResult h5,
+.analysisResult h6 {
+  border-bottom: 1px solid #eaecef;
+  padding-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #24292e;
+}
+
+.analysisResult h1 {
+  font-size: 2rem;
+  border-bottom: 2px solid #eaecef;
+}
+
+.analysisResult h2 {
+  font-size: 1.5rem;
+}
+
+.analysisResult h3 {
+  font-size: 1.25rem;
+}
+
+.analysisResult p {
+  margin-bottom: 1rem;
+  color: #24292e;
+}
+
+.analysisResult ul,
+.analysisResult ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+.analysisResult li {
+  margin-bottom: 0.5rem;
+}
+
+.analysisResult blockquote {
+  margin: 1rem 0;
+  padding: 0 1rem;
+  color: #6a737d;
+  border-left: 4px solid #dfe2e5;
+  background: #f6f8fa;
+  border-radius: 0 4px 4px 0;
+}
+
+.analysisResult hr {
+  height: 1px;
+  margin: 2rem 0;
+  background: #e1e4e8;
+  border: none;
+}
+
+.analysisResult table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.analysisResult th,
+.analysisResult td {
+  border: 1px solid #e1e4e8;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.analysisResult th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+  color: #24292e;
+}
+
+.analysisResult tr:nth-child(even) {
+  background-color: #f6f8fa;
+}
+
+/* 代码块容器样式 */
+.codeBlockContainer {
+  margin: 1rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e1e4e8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.codeBlockHeader {
+  background: #f6f8fa;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #e1e4e8;
+  font-size: 0.8rem;
+  color: #586069;
+}
+
+.codeLanguage {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.codeBlock {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  margin: 0;
+  overflow-x: auto;
+  font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Liberation Mono', 'Consolas', monospace;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: #24292e;
+}
+
+.codeBlock code {
+  background: none;
+  padding: 0;
+  margin: 0;
+  border: none;
+  font-size: inherit;
+  color: inherit;
+  white-space: pre;
+}
+
+/* 代码块滚动条美化 */
+.codeBlock::-webkit-scrollbar {
+  height: 8px;
+}
+
+.codeBlock::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.codeBlock::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.codeBlock::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 行内代码样式 */
+.inlineCode {
+  background-color: rgba(175, 184, 193, 0.2);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'SFMono-Regular', 'Monaco', 'Inconsolata', 'Liberation Mono', 'Consolas', monospace;
+  font-size: 0.85em;
+  color: #e36209;
+}
+
+/* Mermaid 图表容器样式 */
+.mermaidContainer {
+  background: #fff;
+  border: 2px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 2rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 100px;
+  display: block;
+  overflow: visible;
+}
+
+/* Mermaid 图表全局样式 */
+.mermaidContainer svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* 确保 mermaid 图表元素可见 */
+.mermaidContainer .node rect,
+.mermaidContainer .node circle,
+.mermaidContainer .node ellipse,
+.mermaidContainer .node polygon {
+  fill: #f9f9f9;
+  stroke: #0366d6;
+  stroke-width: 2px;
+}
+
+.mermaidContainer .node text {
+  fill: #24292e;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+.mermaidContainer .edgePath path {
+  stroke: #0366d6;
+  stroke-width: 2px;
+  fill: none;
+}
+
+.mermaidContainer .arrowheadPath {
+  fill: #0366d6;
+  stroke: #0366d6;
+}
+
+.analysisStatus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* 文件引用链接样式 */
+.fileReferenceLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e1e8ed;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #333;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+  margin: 0 0.2rem;
+  white-space: nowrap;
+}
+
+.fileReferenceLink:hover {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fileName {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.lineRange {
+  color: #666;
+  font-weight: normal;
+}
+
+/* 分析容器和标题栏样式 */
+.analysisContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.analysisHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem 2rem 1rem 2rem;
+  background: #ffffff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.analysisSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analysisSelector label {
+  font-size: 0.9rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.analysisSelect {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: white;
+  min-width: 120px;
+}
+
+.analysisSelect:focus {
+  outline: none;
+  border-color: #0070f3;
+}
+
+.analysisSelect:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.projectInfo {
+  flex: 1;
+}
+
+.projectName {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.projectDescription {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.repositorySettingsButton {
+  color: rgb(var(--foreground-rgb));
+  background: none;
+  border: 1px solid rgba(var(--foreground-rgb), 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.repositorySettingsButton:hover {
+  background-color: rgba(var(--foreground-rgb), 0.05);
+  border-color: rgba(var(--foreground-rgb), 0.3);
+}
+
+/* 仓库设置模态框样式 */
+.projectInfo h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.projectUrl {
+  color: #1976d2;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+  word-break: break-all;
+}
+
+.projectBranch {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.analysisSection {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.analysisSection h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.analysisTip {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+}
+
+.triggerAnalysisButton {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.triggerAnalysisButton:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+.triggerAnalysisButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.triggerAnalysisButton.loading {
+  background-color: #ccc;
+}
+
+.message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* 解绑仓库区域样式 */
+.unbindSection {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.unbindSection h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #dc2626; /* 红色标题以示警告 */
+}
+
+.unbindTip {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+}
+
+.unbindButton {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.unbindButton:hover:not(:disabled) {
+  background-color: #b91c1c;
+}
+
+.unbindButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.unbindButton.loading {
+  background-color: #ccc;
+}
+
+/* 提交历史侧边栏 */
+.commitSidebar {
+  width: 320px;
+  min-width: 320px; /* 确保右侧栏不会被压缩 */
+  max-width: 320px; /* 确保右侧栏不会扩展 */
+  background-color: #f8f9fa;
+  border-left: 1px solid #e1e4e8;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box; /* 确保边框计算在宽度内 */
+}
+
+.commitSidebarHeader {
+  padding: 1rem;
+  border-bottom: 1px solid #e1e4e8;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 60px; /* 固定头部高度 */
+  box-sizing: border-box;
+}
+
+.commitSidebarHeader h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #24292e;
+}
+
+.loadingDot {
+  color: #0366d6;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* 分支选择器样式 */
+.branchSelector {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e1e4e8;
+  background: #f6f8fa;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.branchLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #24292e;
+  white-space: nowrap;
+}
+
+.branchSelect {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5da;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background: white;
+  color: #24292e;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.branchSelect:focus {
+  outline: none;
+  border-color: #0366d6;
+}
+
+.branchSelect:disabled {
+  background: #f6f8fa;
+  cursor: not-allowed;
+}
+
+.commitSidebarContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.commitSidebarContent::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.emptyState {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #666;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.pushEventItem {
+  border-bottom: 1px solid #e1e4e8;
+  background: white;
+}
+
+.pushEventHeader {
+  padding: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: background-color 0.2s ease;
+}
+
+.pushEventHeader:hover {
+  background-color: #f6f8fa;
+}
+
+.pushEventInfo {
+  flex: 1;
+  min-width: 0; /* 允许内容收缩 */
+  overflow: hidden; /* 防止内容溢出 */
+}
+
+.pushEventTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem; /* 从0.5rem减少到0.25rem */
+}
+
+.expandIcon {
+  color: #666;
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.pushEventTitle strong {
+  font-size: 0.85rem; /* 从0.9rem减少到0.85rem */
+  color: #24292e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%; /* 确保不会超出容器 */
+  display: block; /* 确保省略号正常工作 */
+}
+
+.pushEventMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem; /* 从0.5rem减少到0.4rem */
+  font-size: 0.75rem; /* 从0.8rem减少到0.75rem */
+  color: #666;
+}
+
+.author {
+  font-weight: 500;
+}
+
+.pushDate {
+  color: #888;
+}
+
+.branch {
+  background: #f1f8ff;
+  color: #0366d6;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.commitCount {
+  background: #f6f8fa;
+  color: #586069;
+  padding: 0.15rem 0.4rem; /* 从0.2rem 0.5rem减少到0.15rem 0.4rem */
+  border-radius: 12px;
+  font-size: 0.7rem; /* 从0.75rem减少到0.7rem */
+  white-space: nowrap;
+}
+
+.commitsContainer {
+  background: #fafbfc;
+  border-top: 1px solid #e1e4e8;
+}
+
+.commitItem {
+  display: flex;
+  gap: 0.5rem; /* 从0.6rem进一步减少到0.5rem */
+  padding: 0.4rem 0.75rem; /* 从0.6rem 0.75rem减少到0.4rem 0.75rem */
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.commitItem:last-child {
+  border-bottom: none;
+}
+
+.commitHash {
+  font-family: 'SFMono-Regular', 'Monaco', 'Consolas', monospace;
+  font-size: 0.65rem; /* 从0.7rem进一步减少到0.65rem */
+  color: #0366d6;
+  background: #f1f8ff;
+  padding: 0.1rem 0.25rem; /* 从0.15rem 0.3rem减少到0.1rem 0.25rem */
+  border-radius: 3px;
+  height: fit-content;
+  white-space: nowrap;
+}
+
+.commitDetails {
+  flex: 1;
+  min-width: 0; /* 允许内容收缩 */
+  overflow: hidden; /* 防止溢出 */
+}
+
+.commitMessage {
+  font-size: 0.75rem; /* 从0.8rem进一步减少到0.75rem */
+  color: #24292e;
+  line-height: 1.2; /* 从1.3减少到1.2 */
+  margin-bottom: 0; /* 移除底部边距，因为现在是单行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1; /* 允许消息占据剩余空间 */
+  margin-right: 8px; /* 与作者之间的间距 */
+}
+
+/* 新增：提交信息单行显示容器（底部重复定义） */
+.commitSingleLine {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.commitMeta {
+  display: flex;
+  gap: 0.3rem; /* 从0.4rem进一步减少到0.3rem */
+  font-size: 0.65rem; /* 从0.7rem进一步减少到0.65rem */
+  color: #666;
+}
+
+.commitAuthor {
+  font-weight: 500;
+  font-size: 0.65rem; /* 明确设置字体大小 */
+  color: rgb(var(--accent-rgb));
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 提交分析级别指示器样式 */
+.levelIndicator {
+  font-weight: 500;
+}
+
+.level0 {
+  color: #059669; /* 绿色 - 普通事件 */
+}
+
+.level1 {
+  color: #f59e0b; /* 黄色 - 代码漏洞 */
+}
+
+.level2 {
+  color: #ef4444; /* 红色 - 安全漏洞 */
+}
+
+.level3 {
+  color: #dc2626; /* 深红色 - 信息泄露 */
+  font-weight: 600;
+}
+
+/* Merge Request 专用样式（复用pushEvent样式） */
+.mergeRequestIcon {
+  font-size: 0.9rem;
+}
+
+.mergeRequestBranch {
+  background: #f1f8ff;
+  color: #0366d6;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.mergeRequestStatus {
+  background: #28a745;
+  color: white;
+  padding: 0.1rem 0.4rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.mergeRequestIid {
+  background: #f6f8fa;
+  color: #586069;
+  padding: 0.15rem 0.4rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* MR操作按钮样式 */
+.mergeRequestActions {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-top: 1px solid #e1e4e8;
+  border-radius: 0 0 8px 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.approveButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.approveButton:hover {
+  background: #218838;
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+  transform: translateY(-1px);
+}
+
+.approveButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}

@@ -1,0 +1,215 @@
+/**
+ * API服务模块
+ * 区分GitLab API和后端API调用
+ */
+
+// 获取cookie的工具函数
+const getCookie = (name) => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+  return null;
+};
+
+// GitLab API基础URL
+const GITLAB_BASE_URL = process.env.NEXT_PUBLIC_GITLAB_BASE_URL;
+
+// 创建通用的请求函数
+const createRequest = (baseUrl) => {
+  return async (endpoint, options = {}) => {
+    const token = getCookie("token");
+    const url = `${baseUrl}${endpoint}`;
+    
+    const defaultOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+      ...options,
+    };
+
+    try {
+      const response = await fetch(url, defaultOptions);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error(`API request failed: ${url}`, error);
+      throw error;
+    }
+  };
+};
+
+// GitLab API请求函数
+const gitlabApi = createRequest(GITLAB_BASE_URL);
+
+// 后端API请求函数
+const backendApi = async (endpoint, options = {}) => {
+  // 确保endpoint以/开头，但不会重复添加
+  const url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
+
+    // 检查响应是否OK，如果不OK，尝试解析JSON获取错误信息
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.info || `HTTP error! status: ${response.status}`;
+      const error = new Error(errorMessage);
+      error.response = response;
+      error.status = response.status;
+      throw error;
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error(`Backend API request failed: ${url}`, error);
+    throw error;
+  }
+};
+
+// GitLab API 服务
+export const gitlabService = {
+  // 获取用户信息
+  getUser: () => gitlabApi('/api/v4/user'),
+  
+  // 获取项目列表
+  getProjects: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return gitlabApi(`/api/v4/projects${queryString ? `?${queryString}` : ''}`);
+  },
+  
+  // 获取项目详情
+  getProject: (projectId) => gitlabApi(`/api/v4/projects/${projectId}`),
+  
+  // 获取项目提交记录
+  getProjectCommits: (projectId, params = { per_page: 20 }) => {
+    const queryString = new URLSearchParams(params).toString();
+    return gitlabApi(`/api/v4/projects/${projectId}/repository/commits?${queryString}`);
+  },
+  
+  // 获取项目分支
+  getProjectBranches: (projectId, params = { per_page: 10 }) => {
+    const queryString = new URLSearchParams(params).toString();
+    return gitlabApi(`/api/v4/projects/${projectId}/repository/branches?${queryString}`);
+  },
+  
+  // 获取合并请求
+  getMergeRequests: (projectId, params = { state: 'all', per_page: 10 }) => {
+    const queryString = new URLSearchParams(params).toString();
+    return gitlabApi(`/api/v4/projects/${projectId}/merge_requests?${queryString}`);
+  },
+
+  // 获取项目事件（push事件）
+  getProjectEvents: (projectId, params = { action: 'pushed', per_page: 20 }) => {
+    const queryString = new URLSearchParams(params).toString();
+    return gitlabApi(`/api/v4/projects/${projectId}/events?${queryString}`);
+  },
+
+  // 比较两个提交
+  compareCommits: (projectId, from, to) => {
+    return gitlabApi(`/api/v4/projects/${projectId}/repository/compare?from=${from}&to=${to}`);
+  },
+};
+
+// 后端API服务
+export const backendService = {
+  // 认证相关
+  auth: {
+    // 登录
+    login: () => {
+      window.location.href = '/_/auth/login';
+    },
+    
+    // 登出
+    logout: () => backendApi('/_/auth/logout', { method: 'POST' }),
+    
+    // 获取用户信息
+    getProfile: () => backendApi('/_/auth/profile'),
+  },
+  
+  // 仓库管理相关
+  repositories: {
+    // 获取用户绑定的仓库列表
+    getBoundRepositories: () => backendApi('/api/repositories'),
+    
+    // 绑定新仓库 (使用repo_id)
+    bindRepository: (repoId) => backendApi('/api/repositories', {
+      method: 'POST',
+      body: JSON.stringify({ repo_id: repoId }),
+    }),
+    
+    // 解绑仓库
+    unbindRepository: (repoId) => backendApi(`/api/repositories/${repoId}`, {
+      method: 'DELETE',
+    }),
+  },
+  
+  // 分析相关API
+  analysis: {
+    // 获取分析结果
+    getAnalysisResult(analysisId) {
+      return backendApi(`/api/analysis/${analysisId}`);
+    },
+    
+    // 创建分析任务
+    createAnalysis: (data) => backendApi('/api/analysis', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+    // 获取分析历史
+    getAnalysisHistory: (repoId) => backendApi(`/api/analysis/history?repo_id=${repoId}`),
+  },
+
+  // 提交分析相关API
+  commits: {
+    // 获取提交分析
+    getCommitReview: (commitId) => backendApi(`/api/commits/${commitId}/review`),
+  },
+
+  // Merge Request 相关API
+  mergeRequests: {
+    // 获取MR评估
+    getMergeRequestReview: (repoId, mergeRequestIid) => 
+      backendApi(`/api/merge_requests/${repoId}/${mergeRequestIid}/review`),
+  },
+
+  // 通知设置相关API
+  notifications: {
+    // 获取通知设置
+    getSettings: () => backendApi('/api/notifications/settings'),
+    
+    // 更新通知设置
+    updateSettings: (settings) => backendApi('/api/notifications/settings', {
+      method: 'POST',
+      body: JSON.stringify(settings),
+    }),
+  },
+};
+
+// 工具函数
+export const apiUtils = {
+  getCookie,
+  
+  // 清除认证信息
+  clearAuth: () => {
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  },
+  
+  // 检查是否已登录
+  isAuthenticated: () => !!getCookie('token'),
+};

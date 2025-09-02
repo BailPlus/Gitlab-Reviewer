@@ -1,110 +1,88 @@
-from typing import override
-from threading import Thread
-from gitlab import Gitlab
+from urllib.parse import urljoin
+from . import auth, analysis
 from ..model.repositories import Repository
-from ..interface.repositories import (
-    IRepoGetter,
-    IRepoAdder,
-    IRepoDeleter,
-    ISqlRepoGetter,
-    ISqlUserRepoGetter,
-    ISqlRepoAdder,
-    ISqlRepoBinder,
-    ISqlRepoAnalysisSetter,
-    ISqlRepoDeleter
-)
+from ..model.tokens import Token
+from ..service import analysis
+from ..db import repositories as db
 from ..errors.auth import PermissionDenied
 from ..errors.repositories import *
+from ..core.config import settings
 import gitlab.exceptions
 
-
-class RepoGetter(IRepoGetter):
-    """获取用户绑定的仓库列表"""
-    sql_repo_getter: ISqlUserRepoGetter
-
-    def __init__(self, sql_repo_getter: ISqlUserRepoGetter):
-        self.sql_repo_getter = sql_repo_getter
-
-    @override
-    def get(self, user_id: int) -> list[Repository]:
-        return self.sql_repo_getter.get(user_id)
+__all__ = [
+    'get_user_binded_repos',
+    'bind_repo',
+    'unbind_repo'
+]
 
 
-class RepoAdder(IRepoAdder):
-    """绑定新仓库"""
-    gl: Gitlab
-    sql_repo_getter: ISqlRepoGetter
-    sql_userrepo_getter: ISqlUserRepoGetter
-    sql_repo_adder: ISqlRepoAdder
-    sql_repo_binder: ISqlRepoBinder
-    sql_repo_analysis_setter: ISqlRepoAnalysisSetter
-
-    def __init__(
-            self, 
-            gl: Gitlab,
-            sql_repo_getter: ISqlRepoGetter,
-            sql_userrepo_getter: ISqlUserRepoGetter,
-            sql_repo_adder: ISqlRepoAdder,
-            sql_repo_binder: ISqlRepoBinder,
-            sql_repo_analysis_setter: ISqlRepoAnalysisSetter
-    ):
-        self.gl = gl
-        self.sql_repo_getter = sql_repo_getter
-        self.sql_userrepo_getter = sql_userrepo_getter
-        self.sql_repo_adder = sql_repo_adder
-        self.sql_repo_binder = sql_repo_binder
-        self.sql_repo_analysis_setter = sql_repo_analysis_setter
-
-    @override
-    def add(self, user_id: int, repo_name: str):
-        # 获取仓库id
-        try:
-            repo_id = self.gl.projects.get(repo_name).id
-        except gitlab.exceptions.GitlabGetError as e:
-            raise RepoNotExist from e
-
-        # 检查仓库是否绑定过
-        for repo in self.sql_userrepo_getter.get(user_id):
-            if repo.id == repo_id:
-                raise RepoAlreadyBinded
-
-        # 添加仓库
-        try:
-            self.sql_repo_getter.get(repo_id)
-        except RepoNotExist:
-            self.sql_repo_adder.add(repo_id)
-            self.sql_repo_analysis_setter.add(repo_id)
-        self.sql_repo_binder.bind(user_id, repo_id)
-
-        # 创建分析线程并定义回调。等待AI组提供RepoAnalizer
-        '''        
-        analizer = get_repo_analyzer(repo_id)   # 在core.analysis中定义这个工厂函数，用于创建RepoAnalizer对象
-        @analizer.ondone
-        def callback(result: str):
-            self.sql_repo_analysis_setter.set(repo_id, result)
-        @analizer.onfail
-        def callback_fail(result: str):
-            self.sql_repo_analysis_setter.set_failed(repo_id)
-        Thread(target=analizer.analyze).start()
-        '''
+def get_user_binded_repos(user_id: int) -> list[Repository]:
+    return db.get_user_binded_repos(user_id)
 
 
-class RepoDeleter(IRepoDeleter):
-    """删除仓库"""
-    sql_user_repo_getter: ISqlUserRepoGetter
-    sql_repo_deleter: ISqlRepoDeleter
+def bind_repo(token: Token, repo_id: int):
+    # 验证仓库存在且有访问权限
+    gl = auth.verify_gitlab_token(token.token)
+    try:
+        gl.projects.get(repo_id)
+    except gitlab.exceptions.GitlabGetError as e:
+        raise RepoNotExist from e
 
-    def __init__(self,
-                 sql_user_repo_getter: ISqlUserRepoGetter,
-                 sql_repo_deleter: ISqlRepoDeleter):
-        self.sql_user_repo_getter = sql_user_repo_getter
-        self.sql_repo_deleter = sql_repo_deleter
+    # 检查仓库是否被该用户绑定过
+    for repo in get_user_binded_repos(token.user.id):
+        if repo.id == repo_id:
+            raise RepoAlreadyBinded
 
-    @override
-    def delete(self, user_id: int, repo_id: int):
-        for repo in self.sql_user_repo_getter.get(user_id):
-            if repo.id == repo_id:
-                break
-        else:
-            raise PermissionDenied(info='这不是你的仓库')
-        self.sql_repo_deleter.delete(user_id, repo_id)
+    # 添加仓库
+    try:
+        repo = _get_repo_by_id(repo_id)
+    except RepoNotExist:
+        webhook_id = _create_repo_webhook(token, repo_id)
+        repo = Repository(
+            id=repo_id,
+            webhook_id=webhook_id,
+        )
+        _add_repo_into_db(repo)
+    _bind_repo_with_user(repo.id, token.user.id)
+
+    # 进行分析
+    analysis.analyze(token, repo_id)
+
+
+def unbind_repo(token: Token, repo_id: int):
+    for repo in get_user_binded_repos(token.user_id):
+        if repo.id == repo_id:
+            break
+    else:
+        raise PermissionDenied(info='这不是你的仓库')
+    is_to_delete = db.unbind(token.user_id, repo_id)
+    if is_to_delete:    # 删除webhook
+        gl = auth.verify_gitlab_token(token.token)
+        try:    # 防止提前手动删除后出现bug
+            gl.projects.get(repo_id).hooks.delete(repo.webhook_id)  # XXX: 可能会报不存在的orm对象
+        except Exception:
+            pass
+
+
+def _get_repo_by_id(repo_id: int) -> Repository:
+    return db.get_repo_by_id(repo_id)
+
+
+def _add_repo_into_db(repo: Repository):
+    db.add_repo_into_db(repo)
+
+
+def _bind_repo_with_user(repo_id: int, user_id: int):
+    db.bind_repo_with_user(repo_id, user_id)
+
+
+def _create_repo_webhook(token: Token, repo_id: int) -> int:
+    webhook_id = auth.verify_gitlab_token(token.token).projects.get(repo_id).hooks.create({
+        'url': urljoin(settings.self_url, '/api/webhooks/gitlab'),
+        'push_events': True,
+        'merge_requests_events': True,
+        'pipeline_events': True,
+        'token': settings.gitlab_webhook_token
+    }).get_id()
+    assert isinstance(webhook_id, int)
+    return webhook_id
