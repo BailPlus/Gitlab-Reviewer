@@ -10,7 +10,7 @@ from .api import (
 )
 from .errors import GitlabReviewerException
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 app.include_router(auth.router)
 app.include_router(repositories.router)
 app.include_router(analysis.router)
