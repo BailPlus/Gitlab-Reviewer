@@ -1,0 +1,21 @@
+stages:
+  - lint_and_secure
+
+megalinter:
+  stage: lint_and_secure
+  image: oxsecurity/megalinter:v7
+  variables:
+    DEFAULT_WORKSPACE: "$CI_PROJECT_DIR"
+    GITHUB_WORKSPACE: "$CI_PROJECT_DIR"
+    REPORT_OUTPUT_FOLDER: "megalinter-reports"
+    DISABLE_LINTERS: "REPOSITORY_GRYPE,REPOSITORY_TRIVY,REPOSITORY_TRIVY_SBOM,REPOSITORY_KICS,REPOSITORY_SYFT,REPOSITORY_TRUFFLEHOG,REPOSITORY_GITLEAKS,REPOSITORY_CHECKOV,SPELL_LYCHEE,MARKDOWN_MARKDOWN_LINK_CHECK,SPELL_CSPELL,JSON_NPM_PACKAGE_JSON_LINT,YAML_YAMLLINT,JAVASCRIPT_STANDARD"
+    SHOW_SKIPPED_LINTERS: "true"
+  script:
+    - megalinter-runner
+  artifacts:
+    when: always
+    paths: 
+      - megalinter-reports/copy-paste/html/jscpd-report.json
+    expire_in: 7 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
