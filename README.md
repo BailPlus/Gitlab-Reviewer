@@ -19,9 +19,13 @@ Gitlab-Reviewer 的主要功能是：
 你需要：
 - 一个私有化部署的 GitLab 服务
 - 一个待部署的服务器，要求能与 GitLab 服务器进行双向通信
+- 一个 openai 协议的大模型 api 及其 api_key
 - （可选）邮箱 smtp 账号密码
 
 ### 安装
+> ⚠️ 注意：\
+要想让本程序分析 Gitlab 项目中的 Merge Request 事件，请确保你的 Gitlab 配置了 CI runner ，并将该项目源码中的 `.gitlab-ci.yml` 集成在你的项目的`.gitlab-ci.yml` 中。
+
 #### 后端
 1. 安装 `uv` 运行环境，并进入 `back` 目录
 2. 创建配置文件

@@ -1,8 +1,0 @@
-fastapi
-httpx
-pydantic-settings
-pymysql
-sqlmodel
-uvicorn
-openai
-python-gitlab
